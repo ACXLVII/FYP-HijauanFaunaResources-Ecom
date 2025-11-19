@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Swiper Buttons */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #CCCCCC !important;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: #FFFFFF !important;
+}
+
+.swiper-button-next:active,
+.swiper-button-prev:active {
+  color: #FFFFFF !important;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 2rem !important;
+}
+
+/* Swiper Bullets */
+.swiper-pagination-bullets {
+  bottom: 1 !important; /* moves bullets further up, adjust as needed */
+}
+.swiper-pagination-bullet {
+  width: 8px !important;
+  height: 8px !important;
+  background: #CCCCCC !important;
+  opacity: 0.75 !important;
+  margin: 0 4px !important;
+  transition: background 0.3s;
+}
+.swiper-pagination-bullet-active {
+  background: #FFFFFF !important;
+  opacity: 1;
+}
+
+/* Hide number input spinners for Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number input spinners for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}

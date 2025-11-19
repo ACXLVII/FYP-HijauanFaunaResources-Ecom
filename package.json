@@ -1,0 +1,40 @@
+{
+  "name": "next-ecom",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@google/model-viewer": "^4.1.0",
+    "@headlessui/react": "^2.2.1",
+    "@heroicons/react": "^2.2.0",
+    "@stripe/stripe-js": "^7.8.0",
+    "firebase": "^11.9.1",
+    "leaflet": "^1.9.4",
+    "next": "^15.5.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-firebase-hooks": "^5.1.1",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0",
+    "react-swipeable": "^7.0.2",
+    "stripe": "^18.4.0",
+    "swiper": "^11.2.6"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4.1.4",
+    "@types/estree": "^1.0.8",
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^24.0.3",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4"
+  }
+}

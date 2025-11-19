@@ -1,0 +1,40 @@
+// LIVE GRASS
+{
+  "id": "000",
+  "category": "Live Grass", (Live Grass, Artificial Grass)
+  "name": "Japanese Grass",
+  "images": [
+    "image1.jpg",
+    "image2.jpg",
+    "image3.jpg"
+  ],
+  "description": "Description description.",
+  "priceGroup": [
+    {
+      "price": "5.00",
+      "size": "tile",
+      "measurement": "2ft x 1ft"
+    }
+  ]
+}
+
+//ARTIFICIAL GRASS
+{
+  "id": "000",
+  "category": "Artificial Grass", (Live Grass, Artificial Grass)
+  "subCategory": "Premium", (Economy, Premium)
+  "thickness": 25, (25, 30, 35, 40)
+  "images": [
+    "image1.jpg",
+    "image2.jpg",
+    "image3.jpg"
+  ],
+  "description": "Description description.",
+  "priceGroup": [
+    {
+      "price": "3.00", (3.00, 8.00)
+      "size": "square feet", (square feet, roll)
+      "measurement": "1ft x 1ft" (1ft x 1ft, 83ft x 6.5ft)
+    }
+  ]
+}
