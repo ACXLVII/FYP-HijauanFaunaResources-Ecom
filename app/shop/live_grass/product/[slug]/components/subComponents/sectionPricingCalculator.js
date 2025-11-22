@@ -292,7 +292,7 @@ export default function PricingCalculator({
       image: images[0],
       quantity,
       price: (selectedGroup.price * quantity).toFixed(2),
-      priceID: selectedGroup.priceID,
+      priceID_TEST: selectedGroup.priceID_TEST,
       measurement: selectedGroup.measurement,
       sizeType: selectedGroup.sizeType,
       requestedArea: finalArea,
