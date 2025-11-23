@@ -96,11 +96,101 @@ export default function SectionCheckout() {
     price: product.price,
   }));
 
+  // Helper function to parse Malaysian address from a single string
+  const parseMalaysianAddress = (fullAddress) => {
+    if (!fullAddress) return null;
+    
+    // Malaysian postcode pattern (5 digits)
+    const postcodePattern = /\b(\d{5})\b/;
+    const postcodeMatch = fullAddress.match(postcodePattern);
+    const postcode = postcodeMatch ? postcodeMatch[1] : '';
+    
+    // Malaysian states
+    const states = [
+      'Selangor', 'Kedah', 'Kelantan', 'Malacca', 'Negeri Sembilan',
+      'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak',
+      'Terengganu', 'Johor', 'Kuala Lumpur', 'Labuan', 'Putrajaya'
+    ];
+    
+    let state = '';
+    let city = '';
+    let address = fullAddress;
+    
+    // Try to find state in the address
+    for (const stateName of states) {
+      if (fullAddress.includes(stateName)) {
+        state = stateName;
+        // Remove state from address
+        address = address.replace(new RegExp(stateName, 'gi'), '').trim();
+        break;
+      }
+    }
+    
+    // Common Malaysian cities/towns (you can expand this list)
+    const cities = [
+      'Sungai Buloh', 'Kuala Lumpur', 'Petaling Jaya', 'Shah Alam',
+      'Subang Jaya', 'Klang', 'Ampang', 'Cheras', 'Kajang',
+      'Seremban', 'Malacca', 'Johor Bahru', 'Penang', 'Ipoh',
+      'Alor Setar', 'Kota Kinabalu', 'Kuching', 'Miri', 'Kuantan'
+    ];
+    
+    // Try to find city in the address
+    for (const cityName of cities) {
+      if (fullAddress.includes(cityName)) {
+        city = cityName;
+        // Remove city from address
+        address = address.replace(new RegExp(cityName, 'gi'), '').trim();
+        break;
+      }
+    }
+    
+    // Remove postcode from address
+    if (postcode) {
+      address = address.replace(postcodePattern, '').trim();
+    }
+    
+    // Clean up address (remove extra commas and spaces)
+    address = address.replace(/,\s*,/g, ',').replace(/^,\s*|\s*,$/g, '').trim();
+    
+    return {
+      address: address || fullAddress,
+      postcode: postcode,
+      city: city,
+      state: state
+    };
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
     if (name.startsWith('addressDetails.')) {
       const fieldName = name.split('.')[1];
+      
+      // If user is typing in address field and it looks like a full address, try to parse it
+      if (fieldName === 'address' && value.length > 20) {
+        const parsed = parseMalaysianAddress(value);
+        if (parsed && (parsed.postcode || parsed.city || parsed.state)) {
+          // Auto-fill other fields if they're empty
+          setOrderData((prev) => ({
+            ...prev,
+            addressDetails: {
+              address: parsed.address,
+              postcode: prev.addressDetails.postcode || parsed.postcode,
+              city: prev.addressDetails.city || parsed.city,
+              state: prev.addressDetails.state || parsed.state,
+            },
+          }));
+          
+          if (value.trim().length > 0) {
+            setTouched(prev => ({ ...prev, address: true }));
+            if (parsed.postcode) setTouched(prev => ({ ...prev, postcode: true }));
+            if (parsed.city) setTouched(prev => ({ ...prev, city: true }));
+            if (parsed.state) setTouched(prev => ({ ...prev, state: true }));
+          }
+          return;
+        }
+      }
+      
       setOrderData((prev) => ({
         ...prev,
         addressDetails: {
@@ -130,30 +220,80 @@ export default function SectionCheckout() {
   const geocodeAddress = async (addressDetails) => {
     try {
       const { address, postcode, city, state } = addressDetails;
-      if (!address || !postcode || !city || !state) {
+      if (!address) {
         return null;
       }
 
-      const fullAddress = `${address}, ${postcode} ${city}, ${state}, Malaysia`;
+      // Try multiple address formats for better geocoding success
+      const addressFormats = [];
       
-      // Use OpenStreetMap Nominatim API for geocoding
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`,
-        {
-          headers: {
-            'User-Agent': 'HijauanFaunaResources-Ecom' // Required by Nominatim
-          }
-        }
-      );
-      
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon),
-        };
+      // Format 1: Full structured address (if all fields are provided)
+      if (address && postcode && city && state) {
+        addressFormats.push(`${address}, ${postcode} ${city}, ${state}, Malaysia`);
+        addressFormats.push(`${address}, ${city}, ${state} ${postcode}, Malaysia`);
+        addressFormats.push(`${postcode} ${city}, ${state}, Malaysia`);
       }
+      
+      // Format 2: If address field contains full address, try it directly
+      if (address.includes(postcode) || address.includes(city) || address.includes(state)) {
+        addressFormats.push(`${address}, Malaysia`);
+      }
+      
+      // Format 3: Just the address with postcode
+      if (address && postcode) {
+        addressFormats.push(`${address}, ${postcode}, Malaysia`);
+      }
+      
+      // Format 4: Address with city and state
+      if (address && city && state) {
+        addressFormats.push(`${address}, ${city}, ${state}, Malaysia`);
+      }
+      
+      // Format 5: Just the address
+      addressFormats.push(`${address}, Malaysia`);
+      
+      // Try each format until one works
+      for (const addressFormat of addressFormats) {
+        try {
+          // Use OpenStreetMap Nominatim API for geocoding
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressFormat)}&limit=3&countrycodes=my`,
+            {
+              headers: {
+                'User-Agent': 'HijauanFaunaResources-Ecom' // Required by Nominatim
+              }
+            }
+          );
+          
+          const data = await response.json();
+          
+          if (data && data.length > 0) {
+            // Find the best match (prefer results with higher importance or exact postcode match)
+            let bestMatch = data[0];
+            
+            // If we have a postcode, try to find a match with the same postcode
+            if (postcode) {
+              const postcodeMatch = data.find(result => 
+                result.display_name.includes(postcode) || 
+                result.address?.postcode === postcode
+              );
+              if (postcodeMatch) {
+                bestMatch = postcodeMatch;
+              }
+            }
+            
+            return {
+              lat: parseFloat(bestMatch.lat),
+              lng: parseFloat(bestMatch.lon),
+            };
+          }
+        } catch (formatError) {
+          console.error('Error trying address format:', addressFormat, formatError);
+          // Continue to next format
+          continue;
+        }
+      }
+      
       return null;
     } catch (error) {
       console.error('Geocoding error:', error);
@@ -633,8 +773,10 @@ export default function SectionCheckout() {
                               ? 'border-red-500'
                               : 'border-[#AAAAAA] focus:border-[#C39533]'
                         }`}
-                        placeholder="Enter your street address"
+                        placeholder="Enter your full address"
                       />
+                      <p className="mt-1 text-xs lg:text-sm text-[#4A5565] italic">
+                      </p>
                     </div>
 
                     {/* Postcode */}
