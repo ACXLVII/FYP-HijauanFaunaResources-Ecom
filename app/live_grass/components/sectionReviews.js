@@ -8,8 +8,8 @@ const reviews = [
     id: 1,
     images: [
       {
-        before: "/images/live_grass/review1/before.jpg",
-        after: "/images/live_grass/review1/after.jpg",
+        before: "/images/live_grass/review1/BeforeLive1.jpg",
+        after: "/images/live_grass/review1/AfterLive1.jpg",
       }
     ],
     name: "Customer Name",
@@ -20,8 +20,8 @@ const reviews = [
     id: 2,
     images: [
       {
-        before: "/images/live_grass/review2/before.jpg",
-        after: "/images/live_grass/review2/after.jpg",
+        before: "/images/live_grass/review2/BeforeLive2.jpg",
+        after: "/images/live_grass/review2/AfterLive2.jpg",
       }
     ],
     name: "Customer Name",
@@ -102,7 +102,7 @@ function ReviewCard({ review }) {
           <Image
             src={images[view]}
             alt={view}
-            className="object-cover aspect-16/9 w-full transition-transform duration-500 group-hover:scale-200 lg:group-hover:scale-200"
+            className="object-cover aspect-video w-full transition-transform duration-500 group-hover:scale-200 lg:group-hover:scale-200"
             width={800}
             height={600}
             style={{ pointerEvents: showOverlay ? "none" : "auto" }}
