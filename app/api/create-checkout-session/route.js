@@ -14,8 +14,8 @@ export async function POST(request) {
       payment_method_types: ['card'],
       line_items: items,
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://hijauanfauna.com'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://hijauanfauna.com'}/checkout/cancel`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://fyp.hijauanfauna.com'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://fyp.hijauanfauna.com'}/checkout/cancel`,
       customer_email: customerEmail,
       metadata: {
         ...metadata,
