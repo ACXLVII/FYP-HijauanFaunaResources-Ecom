@@ -6,9 +6,6 @@ import { usePathname } from 'next/navigation';
 import {
   FaChevronLeft
 } from "react-icons/fa";
-import {
-  FaStar
-} from "react-icons/fa";
 
 export default function NavigationPanels({
   openPanel,
@@ -176,42 +173,6 @@ export default function NavigationPanels({
                   
                 </div>
               ))}
-              
-            </div>
-          </div>
-        ) : openPanel === 'Review' ? (
-          <div className="flex p-8">
-            <div className="flex flex-row gap-8">
-              
-              {navigation.menuItems.find(cat => cat.name === 'Review')?.categories.map((category) => {
-                const isActive = pathname.startsWith(category.href);
-                return (
-                  <a
-                    key={category.id}
-                    href={category.href}
-                    className="group flex flex-col items-center justify-center gap-4 p-6 min-w-[200px] rounded-xl border-2 transition-all hover:scale-105 active:scale-95"
-                    style={{
-                      borderColor: isActive ? '#C39533' : '#E5E7EB',
-                      backgroundColor: isActive ? '#FEF3C7' : '#FFFFFF',
-                    }}
-                  >
-                    <category.icon 
-                      className={`size-12 p-2 rounded-full ${
-                        isActive 
-                          ? 'text-[#C39533] bg-[#FEF3C7]' 
-                          : 'text-[#4A5565] bg-[#F3F4F6]'
-                      }`}
-                    />
-                    <h2 className={`p-1 font-bold text-lg transition-colors duration-200 ease-out ${
-                      isActive 
-                        ? 'text-[#C39533]' 
-                        : 'text-[#4A5565] group-hover:text-[#C39533]'
-                    }`}>
-                      {category.name}
-                    </h2>
-                  </a>
-                );
-              })}
               
             </div>
           </div>

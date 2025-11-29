@@ -83,11 +83,9 @@ export default function SectionReviewsList() {
 
   if (loading) {
     return (
-      <div className="bg-[#000000]/50">
-        <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-8 lg:py-16">
-          <div className="text-center text-lg text-[#4A5565]">
-            Loading reviews...
-          </div>
+      <div className="p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
+        <div className="text-center text-lg text-[#4A5565]">
+          Loading reviews...
         </div>
       </div>
     );
@@ -95,11 +93,9 @@ export default function SectionReviewsList() {
 
   if (error) {
     return (
-      <div className="bg-[#000000]/50">
-        <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-8 lg:py-16">
-          <div className="text-center text-lg text-red-500">
-            {error}
-          </div>
+      <div className="p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
+        <div className="text-center text-lg text-red-500">
+          {error}
         </div>
       </div>
     );
@@ -107,32 +103,33 @@ export default function SectionReviewsList() {
 
   if (reviews.length === 0 && !loading && !error) {
     return (
-      <div className="bg-[#000000]/50">
-        <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-8 lg:py-16">
-          <div className="max-w-2xl mx-auto p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg text-center">
-            <p className="text-md lg:text-lg text-[#4A5565] mb-4">
-              No reviews yet. Be the first to share your experience!
-            </p>
-            <a 
-              href="/review" 
-              className="inline-block px-6 py-3 bg-[#498118] text-white rounded-lg hover:bg-[#3d6f14] transition-colors"
-            >
-              Write a Review
-            </a>
-          </div>
-        </div>
+      <div className="p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg text-center">
+        <p className="text-md lg:text-lg text-[#4A5565] mb-4">
+          No reviews yet. Be the first to share your experience!
+        </p>
+        <a 
+          href="/review" 
+          className="inline-block px-6 py-3 bg-[#498118] text-white rounded-lg hover:bg-[#3d6f14] transition-colors"
+        >
+          Write a Review
+        </a>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#000000]/50">
-      <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-8 lg:py-16">
-        <div className="space-y-6 lg:space-y-8">
+    <div>
+      <div className="mb-4 lg:mb-6">
+        <h2 className="font-bold tracking-tight text-lg lg:text-xl text-[#101828] mb-2">
+          Customer Reviews
+        </h2>
+        <hr className="border-t-2 border-[#C39533]" />
+      </div>
+      <div className="space-y-6 lg:space-y-8 max-h-[80vh] overflow-y-auto pr-2">
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="max-w-2xl mx-auto p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg"
+              className="p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg"
             >
               {/* Header */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 gap-2">
@@ -242,7 +239,6 @@ export default function SectionReviewsList() {
             </div>
           ))}
         </div>
-      </div>
     </div>
   );
 }

@@ -16,13 +16,13 @@ export default function SectionHeading() {
             <FaStar className="size-5 lg:size-8 text-[#FFFFFF]" />
           </div>
           <h1 className="flex items-center font-bold tracking-tight text-balance text-3xl lg:text-4xl text-[#101828]">
-            Write a Review
+            Reviews
           </h1>
         </div>
 
         {/* Breadcrumb */}
         <p className="text-balance text-md lg:text-lg text-[#4A5565]">
-          Share your experience with us. Your feedback helps us improve our services.
+          Read customer reviews and share your experience with us. Your feedback helps us improve our services.
         </p>
         
       </div>

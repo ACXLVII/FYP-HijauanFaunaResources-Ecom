@@ -66,10 +66,10 @@ export default function SectionTipsGrass() {
     <div className="bg-[#000000]/50">
       <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-16 lg:py-32">
         
-        <div className="lg:grid lg:grid-cols-12 lg:gap-8 p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
+        <div className="p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
           
-          {/* Left Column */}
-          <div className="lg:col-span-5 mb-4 lg:mb-0">
+          {/* Heading Section */}
+          <div className="mb-4 lg:mb-6">
             <h2 className="mb-2 lg:mb-4 font-bold tracking-tight text-3xl lg:text-4xl text-[#101828]">
               Grass Care Tips
             </h2>
@@ -82,11 +82,15 @@ export default function SectionTipsGrass() {
             </p>
           </div>
 
-          {/* Right Column */}
-          <div className="lg:col-span-7">
-            <dl className="space-y-4 lg:space-y-8">
+          {/* FAQ Boxes Grid */}
+          <dl className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
             {faqs.map((faq, index) => (
-              <div key={index} className="overflow-hidden flex flex-col p-2 lg:p-4 rounded-lg lg:rounded-xl border-2 border-[#C39533]">
+              <div 
+                key={index} 
+                className={`overflow-hidden flex flex-col p-2 lg:p-4 rounded-lg lg:rounded-xl border-2 border-[#C39533] ${
+                  index === 4 ? 'lg:col-span-2' : ''
+                }`}
+              >
                 <div className="flex items-center gap-2 lg:gap-4">
                   {renderIcon(faq.icon, "max-h-fit size-36 lg:size-12 text-[#C39533]")}
                   <div className="min-h-full w-px self-stretch border-l-2 border-[#C39533]" />
@@ -101,8 +105,7 @@ export default function SectionTipsGrass() {
                 </div>
               </div>
             ))}
-            </dl>
-          </div>
+          </dl>
 
         </div>
 

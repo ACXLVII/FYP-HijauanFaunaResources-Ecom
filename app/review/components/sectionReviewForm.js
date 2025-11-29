@@ -166,12 +166,10 @@ export default function SectionReviewForm() {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="bg-[#000000]/50">
+    <div>
       <Toaster position="top-center" />
-      <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-8 lg:py-16">
-
-        {/* Review Form */}
-        <div className="max-w-2xl mx-auto p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
+      {/* Review Form */}
+      <div className="p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg h-full">
           <h2 className="mb-4 font-bold tracking-tight text-lg lg:text-xl text-[#101828]">
             Submit Your Review
           </h2>
@@ -389,8 +387,6 @@ export default function SectionReviewForm() {
             
           </form>
         </div>
-
-      </div>
     </div>
   );
 }
