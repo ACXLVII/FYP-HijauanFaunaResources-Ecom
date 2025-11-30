@@ -30,9 +30,15 @@ export default function ARPreviewButton({
 
   const ensureModelViewer = useCallback(async () => {
     if (typeof window === 'undefined') return;
-    if (window.customElements?.get('model-viewer')) return;
+    if (window.customElements?.get('model-viewer')) {
+      // Wait for custom element to be defined if it exists
+      await window.customElements.whenDefined('model-viewer');
+      return;
+    }
     try {
       await import('@google/model-viewer');
+      // Wait for custom element to be defined
+      await window.customElements.whenDefined('model-viewer');
     } catch (error) {
       console.warn('Failed to load @google/model-viewer', error);
     }
@@ -103,11 +109,82 @@ export default function ARPreviewButton({
   );
 
   const activateAR = useCallback(async () => {
-    if (!modelViewerRef.current || typeof modelViewerRef.current.activateAR !== 'function') {
+    if (!modelViewerRef.current) {
       throw new Error('unsupported');
     }
-    await modelViewerRef.current.activateAR();
-  }, []);
+
+    // Wait for model-viewer to be fully loaded
+    const modelViewer = modelViewerRef.current;
+    
+    // Ensure model-viewer web component is defined
+    await ensureModelViewer();
+    
+    // Small delay to ensure element is ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Check if model-viewer is ready
+    if (typeof modelViewer.activateAR !== 'function') {
+      // Wait for the model-viewer to be defined (with timeout)
+      await new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max
+        const checkReady = () => {
+          attempts++;
+          if (modelViewer.activateAR && typeof modelViewer.activateAR === 'function') {
+            resolve();
+          } else if (attempts >= maxAttempts) {
+            reject(new Error('Model-viewer not ready'));
+          } else {
+            setTimeout(checkReady, 100);
+          }
+        };
+        checkReady();
+      });
+    }
+
+    // Ensure model source is set
+    if (!modelViewer.src && !modelViewer.getAttribute('src')) {
+      throw new Error('Model source not set');
+    }
+
+    // Wait for the model to load if it hasn't already
+    if (modelViewer.loaded === false) {
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          modelViewer.removeEventListener('load', onLoad);
+          reject(new Error('Model loading timeout'));
+        }, 15000); // 15 second timeout
+
+        const onLoad = () => {
+          clearTimeout(timeout);
+          modelViewer.removeEventListener('load', onLoad);
+          resolve();
+        };
+
+        modelViewer.addEventListener('load', onLoad);
+        
+        // If already loaded, resolve immediately
+        if (modelViewer.loaded) {
+          clearTimeout(timeout);
+          modelViewer.removeEventListener('load', onLoad);
+          resolve();
+        }
+      });
+    }
+
+    // Small delay before activating AR to ensure everything is ready
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Now activate AR
+    try {
+      await modelViewer.activateAR();
+    } catch (error) {
+      console.error('AR activation error:', error);
+      // If AR activation fails, it might be because the browser doesn't support it
+      // or the AR mode requires navigation (like scene-viewer)
+      throw error;
+    }
+  }, [ensureModelViewer]);
 
   const handleClick = useCallback(async () => {
     if (!isClient || !isMobile || isActivating) {
@@ -133,6 +210,7 @@ export default function ARPreviewButton({
     try {
       await activateAR();
     } catch (error) {
+      console.error('Failed to start AR:', error);
       handlePermissionDenied(error);
     } finally {
       setIsActivating(false);

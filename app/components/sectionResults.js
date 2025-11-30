@@ -73,7 +73,7 @@ export default function SectionResults() {
           {categories.map((category) => (
             <div
               key={category.id}
-              className="group bg-white/85 rounded-lg lg:rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+              className="group bg-white/85 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
               onClick={() => setSelectedImage(category)}
             >
               {/* Image Container */}

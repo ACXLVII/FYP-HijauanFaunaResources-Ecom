@@ -10,11 +10,17 @@ export default function SectionIntro() {
         
         {/* Intro BEGINS */}
         <div className="flex flex-col items-center justify-center mb-16 lg:mb-32">
-          <h1 className="mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-center text-4xl lg:text-5xl text-[#FFFFFF]">
-            We are <span className="text-[#498118]">Hijauan Fauna Resources</span>
+          <h1 
+            className="mb-2 lg:mb-4 p-2 font-bold tracking-tight text-center text-4xl lg:text-5xl text-[#FFFFFF]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
+            We are <span className="text-[#498118]" style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}>Hijauan Fauna Resources</span>
           </h1>
-          <p className="p-2 bg-[#000000]/70 text-center text-lg lg:text-xl text-[#EEEEEE]">
-            Dedicated to bring <span className="text-[#56BB00]">nature</span> closer to <span className="text-[#C39533]">you</span>.
+          <p 
+            className="p-2 text-center text-lg lg:text-xl text-[#EEEEEE]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
+            Dedicated to bring <span className="text-[#56BB00]" style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}>nature</span> closer to <span className="text-[#C39533]" style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}>you</span>.
           </p>
         </div>
         {/* Intro ENDS */}
@@ -32,10 +38,13 @@ export default function SectionIntro() {
               className="object-cover aspect-4/3 w-full rounded-lg lg:rounded-xl shadow-lg"
             />
             <div className="lg:flex lg:flex-col lg:justify-center">
-              <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+              <p 
+                className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 At Hijauan Fauna, we are passionate about turning outdoor spaces into beautiful, functional, and relaxing environments. From custom landscaping and
                 reliable maintenance to premium grass solutions in both artificial and live varieties, we help homeowners and businesses create green spaces that suit
-                their lifestyle. With a strong focus on quality, care, and customer satisfaction, we make it easy for you to enjoy your garden without the stress.
+                their lifestyle. With a strong focus on quality, care, and customer satisfaction, we make it easy for you to enjoy your garden without the stress.
               </p>
             </div>
           </div>

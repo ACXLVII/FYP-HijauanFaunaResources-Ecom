@@ -120,7 +120,10 @@ export default function SectionReviewsList() {
   return (
     <div>
       <div className="mb-4 lg:mb-6">
-        <h2 className="font-bold tracking-tight text-lg lg:text-xl text-[#101828] mb-2">
+        <h2 
+          className="font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF] mb-2"
+          style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+        >
           Customer Reviews
         </h2>
         <hr className="border-t-2 border-[#C39533]" />
