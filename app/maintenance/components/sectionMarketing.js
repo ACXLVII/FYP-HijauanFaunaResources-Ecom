@@ -10,11 +10,17 @@ export default function SectionMarketing() {
         
         {/* Intro BEGINS */}
         <div className="flex flex-col items-center justify-center mb-16 lg:mb-32">
-          <h1 className="mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-4xl lg:text-5xl text-[#FFFFFF]">
+          <h1 
+            className="mb-2 lg:mb-4 p-2 font-bold tracking-tight text-4xl lg:text-5xl text-[#FFFFFF]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
             Let Us Handle the Hard Work
           </h1>
-          <p className="p-2 bg-[#000000]/70 text-center text-lg lg:text-xl text-[#EEEEEE]">
-            Keep your garden looking its best all year round with expert care, reliable service, and worry-free upkeep.
+          <p 
+            className="p-2 text-center text-lg lg:text-xl text-[#EEEEEE]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
+            Keep your garden looking its best all year round with expert care, reliable service, and worry-free upkeep.
           </p>
         </div>
         {/* Intro ENDS */}
@@ -32,11 +38,17 @@ export default function SectionMarketing() {
               height={600}
             />
             <div className="lg:flex lg:flex-col lg:justify-center">
-              <h2 className="w-fit mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+              <h2 
+                className="w-fit mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 Professional Care
               </h2>
-              <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
-                Our expert team treats your garden like it’s their own. We use the right tools, the right techniques, and show up on time. Whether it’s a tidy-up or ongoing
+              <p 
+                className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
+                Our expert team treats your garden like it's their own. We use the right tools, the right techniques, and show up on time. Whether it's a tidy-up or ongoing
                 maintenance, we deliver quality service that brings out the best in your green space.
               </p>
             </div>
@@ -52,12 +64,18 @@ export default function SectionMarketing() {
               height={600}
             />
             <div className="order-2 lg:order-1 lg:flex lg:flex-col lg:justify-center">
-              <h2 className="w-fit mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-center text-2xl lg:text-3xl text-[#FFFFFF]">
+              <h2 
+                className="w-fit mb-2 lg:mb-4 p-2 font-bold tracking-tight text-center text-2xl lg:text-3xl text-[#FFFFFF]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 Clean, Clear, and Satisfaction Guaranteed
               </h2>
-              <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+              <p 
+                className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 We believe your garden should always look its best and your satisfaction comes first. From clearing debris to perfecting edges, we leave your outdoor space looking
-                fresh and tidy. Not fully satisfied after we’re done? Just give us a call, and we’ll come back to make it right ! No extra charge.
+                fresh and tidy. Not fully satisfied after we're done? Just give us a call, and we'll come back to make it right ! No extra charge.
               </p>
             </div>
           </div>
@@ -72,12 +90,18 @@ export default function SectionMarketing() {
               height={600}
             />
             <div className="lg:flex lg:flex-col lg:justify-center">
-              <h2 className="w-fit mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+              <h2 
+                className="w-fit mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 Flexible Care Plans 
               </h2>
-              <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
-                Every outdoor space has its own rhythm, and we’re here to match it. Whether you need regular weekly upkeep or occasional seasonal care, our customizable maintenance
-                plans are built around your schedule and budget. Enjoy consistent, high-quality service on your terms.
+              <p 
+                className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
+                Every outdoor space has its own rhythm, and we're here to match it. Whether you need regular weekly upkeep or occasional seasonal care, our customizable maintenance
+                plans are built around your schedule and budget. Enjoy consistent, high-quality service on your terms.
               </p>
             </div>
           </div>

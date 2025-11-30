@@ -10,11 +10,17 @@ export default function SectionMarketing() {
         
         {/* Intro BEGINS */}
         <div className="flex flex-col items-center justify-center mb-16 lg:mb-32">
-          <h1 className="mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-center text-4xl lg:text-5xl text-[#FFFFFF]">
+          <h1 
+            className="mb-2 lg:mb-4 p-2 font-bold tracking-tight text-center text-4xl lg:text-5xl text-[#FFFFFF]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
             Perfect Grass, Zero Effort.
           </h1>
-          <p className="p-2 bg-[#000000]/70 text-center text-lg lg:text-xl text-[#EEEEEE]">
-            [something about artificial grass] Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          <p 
+            className="p-2 text-center text-lg lg:text-xl text-[#EEEEEE]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
+            Bring effortless beauty to your outdoor space with vibrant, long-lasting artificial grass.
           </p>
         </div>
         {/* Intro ENDS */}
@@ -36,10 +42,16 @@ export default function SectionMarketing() {
               alt="Artificial Grass"
               className="object-cover aspect-4/3 w-full mb-2 lg:mb-4 rounded-lg lg:rounded-xl shadow-lg"
             /> */}
-            <h2 className="inline-block mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+            <h2 
+              className="inline-block mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+              style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+            >
               Green, All Year Round
             </h2>
-            <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+            <p 
+              className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+              style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+            >
               Enjoy perfect, vibrant grass 365 days a year! No mowing, no watering, no worries. Our artificial grass stays lush and beautiful in any weather, for a lawn that
               always looks its best.
             </p>
@@ -52,10 +64,16 @@ export default function SectionMarketing() {
               alt="Artificial Grass"
               className="object-cover aspect-4/3 w-full mb-2 lg:mb-4 rounded-lg lg:rounded-xl shadow-lg"
             />
-            <h2 className="inline-block mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+            <h2 
+              className="inline-block mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+              style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+            >
               Low Maintenance, High Impact
             </h2>
-            <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+            <p 
+              className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+              style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+            >
               Say goodbye to muddy mess and hello to hassle-free beauty. With artificial grass, your outdoor space stays clean, green, and guest ready with all minimal upkeep.
             </p>
           </div>
@@ -67,12 +85,18 @@ export default function SectionMarketing() {
               alt="Artificial Grass"
               className="object-cover aspect-4/3 w-full mb-2 lg:mb-4 rounded-lg lg:rounded-xl shadow-lg"
             />
-            <h2 className="inline-block mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+            <h2 
+              className="inline-block mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+              style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+            >
               Style That Lasts
             </h2>
-            <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
-              Whether it’s your backyard, balcony, or business front, artificial grass brings long-lasting style and comfort. It’s the smart choice for modern living with a
-              natural look.
+            <p 
+              className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+              style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+            >
+              Whether it's your backyard, balcony, or business front, artificial grass brings long-lasting style and comfort. It's the smart choice for modern living with a
+              natural look.
             </p>
           </div>
           

@@ -60,7 +60,10 @@ export default function SectionResults() {
 
         {/* Heading */}
         <div className="flex flex-col items-center justify-center mb-8 lg:mb-16">
-          <h1 className="p-2 bg-[#000000]/70 font-bold tracking-tight text-center text-3xl lg:text-4xl text-[#FFFFFF]">
+          <h1 
+            className="p-2 font-bold tracking-tight text-center text-3xl lg:text-4xl text-[#FFFFFF]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
             Work That Drives Results
           </h1>
         </div>
@@ -70,7 +73,7 @@ export default function SectionResults() {
           {categories.map((category) => (
             <div
               key={category.id}
-              className="group bg-white rounded-lg lg:rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+              className="group bg-white/85 rounded-lg lg:rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
               onClick={() => setSelectedImage(category)}
             >
               {/* Image Container */}

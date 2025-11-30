@@ -107,17 +107,26 @@ export default function SectionGrades() {
               <div className="p-4 lg:p-8 bg-[#C39533]">
                 
                 {/* Title */}
-                <h1 className="w-fit p-2 mb-2 lg:mb-4 bg-[#000000]/70 font-bold tracking-tight text-3xl lg:text-4xl text-[#FFFFFF]">
+                <h1 
+                  className="w-fit p-2 mb-2 lg:mb-4 font-bold tracking-tight text-3xl lg:text-4xl text-[#FFFFFF]"
+                  style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+                >
                   Economy
                 </h1>
 
                 {/* Description */}
-                <p className="p-2 mb-2 lg:mb-4 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
-                  A smart and budget-friendly choice for simple landscaping needs. Economy grass provides neat, green coverage with basic comfort and durability. It’s easy to install
+                <p 
+                  className="p-2 mb-2 lg:mb-4 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                  style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+                >
+                  A smart and budget-friendly choice for simple landscaping needs. Economy grass provides neat, green coverage with basic comfort and durability. It's easy to install
                   and maintain, making it great for temporary setups, rental units, kids' play areas, or areas with low foot traffic.
                 </p>
-                <p className="p-2 mb-4 lg:mb-8 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
-                  <span className="font-bold">Ideal for:</span> budget-conscious users, events, basic yard upgrades.
+                <p 
+                  className="p-2 mb-4 lg:mb-8 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                  style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+                >
+                  <span className="font-bold">Ideal for:</span> budget-conscious users, events, basic yard upgrades.
                 </p>
                 
                 {/* Button Grid */}

@@ -4,6 +4,7 @@ import Header from '@/components/header'
 import Footer from '@/components/footer'
 
 import Welcome from '@/app/components/sectionWelcome'
+import PromoBanner from '@/app/components/sectionPromoBanner'
 import Prices from '@/app/components/sectionPrices'
 import Services from '@/app/components/sectionServices'
 import Results from '@/app/components/sectionResults'
@@ -15,6 +16,7 @@ export default function HomePage() {
       <Header />
       
       <main className="mt-21"> {/* padding for header + green bar */}
+        <PromoBanner />
         <Welcome />
         <Prices />
         <Services />

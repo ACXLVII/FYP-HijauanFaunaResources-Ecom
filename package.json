@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/stack-sans-headline": "^5.2.1",
+    "@fontsource/stack-sans-text": "^5.2.1",
     "@google/model-viewer": "^4.1.0",
     "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",

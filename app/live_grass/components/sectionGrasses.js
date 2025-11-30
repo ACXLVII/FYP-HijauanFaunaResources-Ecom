@@ -49,7 +49,7 @@ function ImageSlideshow({ images }) {
 
   return (
     <div
-      className="relative flex items-center justify-center aspect-4/3 w-full bg-[#000000]"
+      className="overflow-hidden relative flex items-center justify-center h-64 lg:h-80 w-full bg-[#000000]"
       style={{ touchAction: 'pan-y' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -58,9 +58,10 @@ function ImageSlideshow({ images }) {
       <Image
         src={images[index]}
         alt="Slideshow"
-        className="object-cover aspect-4/3 w-full"
-        width={800}
-        height={600}
+        className="object-center object-cover"
+        fill
+        sizes="(max-width: 1024px) 100vw, 50vw"
+        priority={index === 0}
       />
       {images.length > 1 && (
         <>
@@ -96,33 +97,40 @@ export default function SectionGrasses() {
         <div className="flex flex-col gap-8 lg:gap-16">
           
           {/* Japanese Grass */}
-          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg bg-[#C39533]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <ImageSlideshow images={[
                 '/images/live_grass/grasses/japanese/image1.jpg',
                 '/images/live_grass/grasses/japanese/image2.jpg',
                 '/images/live_grass/grasses/japanese/image3.jpg'
               ]} />
-              <div className="p-4 lg:p-8 bg-[#C39533]">
+              <div className="p-3 lg:p-6 bg-[#C39533] flex flex-col justify-center">
                 
                 {/* Title */}
-                <h1 className="w-fit p-2 mb-2 lg:mb-4 bg-[#000000]/70 font-bold tracking-tight text-3xl lg:text-4xl text-[#FFFFFF]">
+                <h1 
+                  className="w-fit mb-2 lg:mb-3 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                  style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+                >
                   Japanese Grass
                 </h1>
 
                 {/* Description */}
-                <p className="p-2 mb-2 lg:mb-4 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+                <p 
+                  className="mb-2 lg:mb-3 text-justify text-sm lg:text-base text-[#000000]"
+                >
                   Known for its fine, dense texture and rich green hue, Japanese grass offers a clean, carpet-like finish that adds elegance to any lawn. Ideal for high-end landscapes,
                   residential gardens, and spaces where aesthetics matter most.
                 </p>
-                <p className="p-2 mb-4 lg:mb-8 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+                <p 
+                  className="mb-3 lg:mb-4 text-justify text-sm lg:text-base text-[#000000]"
+                >
                   <span className="font-bold">Perfect for:</span> homeowners, premium gardens, aesthetic lawn lovers.
                 </p>
                 
                 {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
-                    className="p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/japanese.glb"
                     iosSrc="/models/live_grass/japanese.usdz"
                     posterSrc="/images/live_grass/grasses/japanese/image1.jpg"
@@ -135,7 +143,7 @@ export default function SectionGrasses() {
                     </div>
                   </ARPreviewButton>
                   <button
-                    className="p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/JapaneseGrass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -152,33 +160,40 @@ export default function SectionGrasses() {
           </div>
 
           {/* Philippine Grass */}
-          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg bg-[#C39533]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <ImageSlideshow images={[
                 '/images/live_grass/grasses/philippine/image1.jpg',
                 '/images/live_grass/grasses/philippine/image2.jpg',
                 '/images/live_grass/grasses/philippine/image3.jpg'
               ]} />
-              <div className="p-4 lg:p-8 bg-[#C39533]">
+              <div className="p-3 lg:p-6 bg-[#C39533] flex flex-col justify-center">
                 
                 {/* Title */}
-                <h1 className="w-fit p-2 mb-2 lg:mb-4 bg-[#000000]/70 font-bold tracking-tight text-3xl lg:text-4xl text-[#FFFFFF]">
+                <h1 
+                  className="w-fit mb-2 lg:mb-3 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                  style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+                >
                   Philippine Grass
                 </h1>
 
                 {/* Description */}
-                <p className="p-2 mb-2 lg:mb-4 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+                <p 
+                  className="mb-2 lg:mb-3 text-justify text-sm lg:text-base text-[#000000]"
+                >
                   Light, soft, and gentle on bare feet, Philippine grass is your go-to for comfort and tropical charm. It grows fast and adapts well to shaded areas, making it a
                   family-friendly favorite for homes with kids or pets.
                 </p>
-                <p className="p-2 mb-4 lg:mb-8 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+                <p 
+                  className="mb-3 lg:mb-4 text-justify text-sm lg:text-base text-[#000000]"
+                >
                   <span className="font-bold">Perfect for:</span> shaded lawns, family backyards, barefoot play zones.
                 </p>
                 
                 {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
-                    className="p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/philippine.glb"
                     iosSrc="/models/live_grass/philippine.usdz"
                     posterSrc="/images/live_grass/grasses/philippine/image1.jpg"
@@ -191,7 +206,7 @@ export default function SectionGrasses() {
                     </div>
                   </ARPreviewButton>
                   <button
-                    className="p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/PhilipineGrass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -208,33 +223,40 @@ export default function SectionGrasses() {
           </div>
 
           {/* Pearl Grass */}
-          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg bg-[#C39533]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <ImageSlideshow images={[
                 '/images/live_grass/grasses/pearl/image1.jpg',
                 '/images/live_grass/grasses/pearl/image2.jpg',
                 '/images/live_grass/grasses/pearl/image3.jpg'
               ]} />
-              <div className="p-4 lg:p-8 bg-[#C39533]">
+              <div className="p-3 lg:p-6 bg-[#C39533] flex flex-col justify-center">
                 
                 {/* Title */}
-                <h1 className="w-fit p-2 mb-2 lg:mb-4 bg-[#000000]/70 font-bold tracking-tight text-3xl lg:text-4xl text-[#FFFFFF]">
+                <h1 
+                  className="w-fit mb-2 lg:mb-3 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                  style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+                >
                   Pearl Grass
                 </h1>
                 
                 {/* Description */}
-                <p className="p-2 mb-2 lg:mb-4 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+                <p 
+                  className="mb-2 lg:mb-3 text-justify text-sm lg:text-base text-[#000000]"
+                >
                   With its signature glossy leaves and vibrant green tone, Pearl grass gives your space a fresh, dewy look all day long. It thrives in moist soil and offers a
                   beautiful, low-growing cover for modern yards.
                 </p>
-                <p className="p-2 mb-4 lg:mb-8 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+                <p 
+                  className="mb-3 lg:mb-4 text-justify text-sm lg:text-base text-[#000000]"
+                >
                   <span className="font-bold">Perfect for:</span> decorative landscaping, borders, garden beds.
                 </p>
                 
                 {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
-                    className="p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/pearl.glb"
                     iosSrc="/models/live_grass/pearl.usdz"
                     posterSrc="/images/live_grass/grasses/pearl/image1.jpg"
@@ -247,7 +269,7 @@ export default function SectionGrasses() {
                     </div>
                   </ARPreviewButton>
                   <button
-                    className="p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/PearlGrass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -264,33 +286,40 @@ export default function SectionGrasses() {
           </div>
 
           {/* Cow Grass */}
-          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-lg lg:rounded-xl shadow-lg bg-[#C39533]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <ImageSlideshow images={[
                 '/images/live_grass/grasses/cow/image1.jpg',
                 '/images/live_grass/grasses/cow/image2.jpg',
                 '/images/live_grass/grasses/cow/image3.jpg'
               ]} />
-              <div className="p-4 lg:p-8 bg-[#C39533]">
+              <div className="p-3 lg:p-6 bg-[#C39533] flex flex-col justify-center">
                 
                 {/* Title */}
-                <h1 className="w-fit p-2 mb-2 lg:mb-4 bg-[#000000]/70 font-bold tracking-tight text-3xl lg:text-4xl text-[#FFFFFF]">
+                <h1 
+                  className="w-fit mb-2 lg:mb-3 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                  style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+                >
                   Cow Grass
                 </h1>
 
                 {/* Description */}
-                <p className="p-2 mb-2 lg:mb-4 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+                <p 
+                  className="mb-2 lg:mb-3 text-justify text-sm lg:text-base text-[#000000]"
+                >
                   Durable and easy to maintain, Cow grass is a cost-effective solution for wide areas and outdoor spaces. Its broad blades and hardy nature make it great for
                   playgrounds, parks, or lawns with frequent foot traffic.
                 </p>
-                <p className="p-2 mb-4 lg:mb-8 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
-                  <span className="font-bold">Perfect for:</span> schools, open fields, budget-friendly lawn coverage.
+                <p 
+                  className="mb-3 lg:mb-4 text-justify text-sm lg:text-base text-[#000000]"
+                >
+                  <span className="font-bold">Perfect for:</span> schools, open fields, budget-friendly lawn coverage.
                 </p>
                 
                 {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
-                    className="p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/cow.glb"
                     iosSrc="/models/live_grass/cow.usdz"
                     posterSrc="/images/live_grass/grasses/cow/image1.jpg"
@@ -303,7 +332,7 @@ export default function SectionGrasses() {
                     </div>
                   </ARPreviewButton>
                   <button
-                    className="p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/CowGrass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">

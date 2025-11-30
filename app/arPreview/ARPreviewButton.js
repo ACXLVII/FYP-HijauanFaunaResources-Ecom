@@ -26,6 +26,7 @@ export default function ARPreviewButton({
   const [isMobile, setIsMobile] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [dialogState, setDialogState] = useState({ open: false, message: '' });
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const ensureModelViewer = useCallback(async () => {
     if (typeof window === 'undefined') return;
@@ -119,13 +120,24 @@ export default function ARPreviewButton({
       if (typeof onPermissionGranted === 'function') {
         onPermissionGranted();
       }
+      // Show instructions before activating AR
+      setShowInstructions(true);
+    } catch (error) {
+      handlePermissionDenied(error);
+      setIsActivating(false);
+    }
+  }, [handlePermissionDenied, isActivating, isClient, isMobile, onPermissionGranted, requestCameraPermission]);
+
+  const handleStartAR = useCallback(async () => {
+    setShowInstructions(false);
+    try {
       await activateAR();
     } catch (error) {
       handlePermissionDenied(error);
     } finally {
       setIsActivating(false);
     }
-  }, [activateAR, handlePermissionDenied, isActivating, isClient, isMobile, onPermissionGranted, requestCameraPermission]);
+  }, [activateAR, handlePermissionDenied]);
 
   const sharedAttributes = useMemo(
     () => ({
@@ -169,6 +181,55 @@ export default function ARPreviewButton({
             >
               Got it
             </button>
+          </div>
+        </div>
+      )}
+
+      {showInstructions && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
+            <h2 className="mb-3 text-lg font-semibold text-gray-900">
+              AR Preview Instructions
+            </h2>
+            <div className="mb-6 space-y-2 text-left text-sm text-gray-700">
+              <p className="flex items-start gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">
+                  1
+                </span>
+                <span>Point your camera at the dirt or bare soil area where you want to see the grass.</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">
+                  2
+                </span>
+                <span>Wait for the surface detection to complete (you'll see tracking indicators).</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">
+                  3
+                </span>
+                <span><strong>Tap on the dirt area</strong> to place the grass model there.</span>
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 shadow hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400/70"
+                onClick={() => {
+                  setShowInstructions(false);
+                  setIsActivating(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-md bg-[#623183] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#4e2667] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4e2667]/70"
+                onClick={handleStartAR}
+              >
+                Start AR
+              </button>
+            </div>
           </div>
         </div>
       )}

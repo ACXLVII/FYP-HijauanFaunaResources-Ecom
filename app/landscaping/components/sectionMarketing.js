@@ -10,10 +10,16 @@ export default function SectionMarketing() {
         
         {/* Intro BEGINS */}
         <div className="flex flex-col items-center justify-center mb-16 lg:mb-32">
-          <h1 className="mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-center text-4xl lg:text-5xl text-[#FFFFFF]">
+          <h1 
+            className="mb-2 lg:mb-4 p-2 font-bold tracking-tight text-center text-4xl lg:text-5xl text-[#FFFFFF]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
             Design Nature Your Way
           </h1>
-          <p className="p-2 bg-[#000000]/70 text-center text-lg lg:text-xl text-[#EEEEEE]">
+          <p 
+            className="p-2 text-center text-lg lg:text-xl text-[#EEEEEE]"
+            style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+          >
             Transform your outdoor space into a stunning, personalized landscape that reflects your style and enhances your lifestyle.
           </p>
         </div>
@@ -32,13 +38,19 @@ export default function SectionMarketing() {
               height={600}
             />
             <div className="lg:flex lg:flex-col lg:justify-center">
-              <h2 className="w-fit mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+              <h2 
+                className="w-fit mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 Customized Green Design That Matches Your Lifestyle
               </h2>
-              <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
-                We believe that every outdoor space should reflect your personality. That’s why we offer fully personalized landscaping designs from neat, modern aesthetics to lush
+              <p 
+                className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
+                We believe that every outdoor space should reflect your personality. That's why we offer fully personalized landscaping designs from neat, modern aesthetics to lush
                 tropical vibes. Our design team works closely with you to plan layouts, plant selections, and green zones that enhance both your lifestyle and property value. Whether
-                it’s a cozy garden for morning coffee or a bold front yard for a lasting first impression, we shape greenery to suit your vision.
+                it's a cozy garden for morning coffee or a bold front yard for a lasting first impression, we shape greenery to suit your vision.
               </p>
             </div>
           </div>
@@ -53,10 +65,16 @@ export default function SectionMarketing() {
               height={600}
             />
             <div className="order-2 lg:order-1 lg:flex lg:flex-col lg:justify-center">
-              <h2 className="w-fit mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+              <h2 
+                className="w-fit mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 Expert Installation
               </h2>
-              <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+              <p 
+                className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 Great landscaping starts with solid groundwork. Our professional team handles everything from soil conditioning and drainage to turf laying, pathway shaping, and
                 finishing touches. We use high-quality materials, precise techniques, and years of industry experience to create outdoor spaces that are not only beautiful but also
                 durable in any weather.
@@ -74,12 +92,18 @@ export default function SectionMarketing() {
               height={600}
             />
             <div className="lg:flex lg:flex-col lg:justify-center">
-              <h2 className="w-fit mb-2 lg:mb-4 p-2 bg-[#000000]/70 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]">
+              <h2 
+                className="w-fit mb-2 lg:mb-4 p-2 font-bold tracking-tight text-2xl lg:text-3xl text-[#FFFFFF]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 Safe and Family-Friendly Designs
               </h2>
-              <p className="p-2 bg-[#000000]/70 text-justify text-md lg:text-lg text-[#EEEEEE]">
+              <p 
+                className="p-2 text-justify text-md lg:text-lg text-[#EEEEEE]"
+                style={{ textShadow: '4px 4px 12px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)' }}
+              >
                 We prioritize safety and comfort in every landscape we create. From non-slip walkways to soft grass areas for kids and pets, our designs are made for real-life use.
-                Whether it's playtime, gatherings, or quiet evenings, your outdoor space becomes a secure and welcoming place for the whole family.
+                Whether it's playtime, gatherings, or quiet evenings, your outdoor space becomes a secure and welcoming place for the whole family.
               </p>
             </div>
           </div>
