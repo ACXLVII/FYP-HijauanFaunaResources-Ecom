@@ -233,15 +233,16 @@ export default function ARPreviewButton({
       
       // Verify USDZ file exists and is accessible with proper headers
       try {
+        // Try GET instead of HEAD to ensure file is fully accessible
         const response = await fetch(absoluteIosSrc, { 
-          method: 'HEAD',
+          method: 'GET',
           headers: {
             'Accept': 'model/vnd.usdz+zip, application/octet-stream, */*'
           }
         });
         
         if (!response.ok) {
-          const errorMsg = `USDZ file not accessible: ${response.status}`;
+          const errorMsg = `USDZ file not accessible: ${response.status} ${response.statusText}`;
           addDebugLog(errorMsg, 'error');
           console.error('USDZ file not accessible:', absoluteIosSrc, 'Status:', response.status);
           throw new Error(`USDZ file not accessible: ${response.status}`);
@@ -250,16 +251,28 @@ export default function ARPreviewButton({
           const contentLength = response.headers.get('content-length');
           const fileSize = contentLength ? `${(parseInt(contentLength) / 1024).toFixed(2)} KB` : 'unknown';
           
-          addDebugLog(`USDZ verified: ${fileSize} (${contentType || 'no type'})`, 'success');
+          // Check if we actually got data
+          const blob = await response.blob();
+          const actualSize = blob.size;
+          const actualSizeKB = `${(actualSize / 1024).toFixed(2)} KB`;
+          
+          addDebugLog(`USDZ verified: ${actualSizeKB} (${contentType || 'no type'})`, 'success');
           console.log('USDZ file verified:', {
             url: absoluteIosSrc,
             contentType,
-            contentLength: fileSize
+            headerSize: fileSize,
+            actualSize: actualSizeKB
           });
           
-          if (contentLength === '0' || contentLength === null) {
-            addDebugLog('WARNING: USDZ file appears empty or missing content-length', 'error');
-            console.warn('USDZ file appears to be empty or content-length header missing');
+          if (actualSize === 0) {
+            const errorMsg = 'USDZ file is empty (0 bytes)';
+            addDebugLog(errorMsg, 'error');
+            throw new Error(errorMsg);
+          }
+          
+          // Check if content-type is correct for USDZ
+          if (contentType && !contentType.includes('usdz') && !contentType.includes('octet-stream') && !contentType.includes('zip')) {
+            addDebugLog(`WARNING: Unexpected content-type: ${contentType}`, 'error');
           }
         }
       } catch (error) {
