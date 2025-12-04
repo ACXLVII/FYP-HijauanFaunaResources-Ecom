@@ -25,7 +25,7 @@ export default function ARPreviewButton({
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
-  const [dialogState, setDialogState] = useState({ open: false, message: '' });
+  const [dialogState, setDialogState] = useState({ open: false, message: '', title: 'Camera Permission Needed' });
   const [showInstructions, setShowInstructions] = useState(false);
 
   const ensureModelViewer = useCallback(async () => {
@@ -48,7 +48,16 @@ export default function ARPreviewButton({
     if (typeof window === 'undefined') return;
 
     setIsClient(true);
-    ensureModelViewer();
+    ensureModelViewer().then(() => {
+      // Preload the model when component mounts so it's ready when user clicks AR
+      if (modelViewerRef.current && modelSrc) {
+        // Ensure model-viewer has the src set and starts loading
+        const modelViewer = modelViewerRef.current;
+        if (!modelViewer.src && modelSrc) {
+          modelViewer.src = modelSrc;
+        }
+      }
+    });
 
     const mediaQuery = window.matchMedia('(max-width: 1024px)');
     const updateIsMobile = (eventOrMQ) => {
@@ -62,7 +71,7 @@ export default function ARPreviewButton({
     return () => {
       mediaQuery.removeEventListener('change', updateIsMobile);
     };
-  }, [ensureModelViewer]);
+  }, [ensureModelViewer, modelSrc]);
 
   const stopStreamTracks = useCallback((stream) => {
     if (!stream) return;
@@ -99,7 +108,29 @@ export default function ARPreviewButton({
         message = 'AR preview is not supported on this device or browser.';
       }
 
-      setDialogState({ open: true, message });
+      setDialogState({ open: true, message, title: 'Camera Permission Needed' });
+
+      if (typeof onPermissionDenied === 'function') {
+        onPermissionDenied(error);
+      }
+    },
+    [onPermissionDenied],
+  );
+
+  const handleARActivationError = useCallback(
+    (error) => {
+      let message = 'Unable to start AR preview. Please try again.';
+      if (error?.message?.includes('Model-viewer not ready')) {
+        message = 'AR is still loading. Please wait a moment and try again.';
+      } else if (error?.message?.includes('Model loading timeout')) {
+        message = 'The 3D model is taking too long to load. Please check your connection and try again.';
+      } else if (error?.message?.includes('AR activation failed')) {
+        message = 'AR preview could not be started. Your device or browser may not support AR, or the model file may be missing.';
+      } else if (error?.message === 'unsupported' || error?.message?.includes('not supported')) {
+        message = 'AR preview is not supported on this device or browser.';
+      }
+
+      setDialogState({ open: true, message, title: 'AR Preview Error' });
 
       if (typeof onPermissionDenied === 'function') {
         onPermissionDenied(error);
@@ -110,7 +141,7 @@ export default function ARPreviewButton({
 
   const activateAR = useCallback(async () => {
     if (!modelViewerRef.current) {
-      throw new Error('unsupported');
+      throw new Error('Model viewer not available');
     }
 
     // Wait for model-viewer to be fully loaded
@@ -147,42 +178,62 @@ export default function ARPreviewButton({
       throw new Error('Model source not set');
     }
 
+    // Make model-viewer have proper dimensions for AR activation
+    // Some AR implementations require the element to have dimensions in the viewport
+    const originalStyle = modelViewer.style.cssText;
+    // Give it dimensions but keep it visually hidden
+    modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; opacity: 0; pointer-events: none; z-index: -1;';
+
     // Wait for the model to load if it hasn't already
-    if (modelViewer.loaded === false) {
+    // Check if model is already loaded
+    const isModelLoaded = modelViewer.loaded === true || 
+                          (modelViewer.hasAttribute && modelViewer.hasAttribute('loaded')) ||
+                          (modelViewer.shadowRoot && modelViewer.shadowRoot.querySelector('canvas'));
+    
+    if (!isModelLoaded) {
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           modelViewer.removeEventListener('load', onLoad);
+          modelViewer.removeEventListener('model-loaded', onLoad);
+          modelViewer.style.cssText = originalStyle;
           reject(new Error('Model loading timeout'));
         }, 15000); // 15 second timeout
 
         const onLoad = () => {
           clearTimeout(timeout);
           modelViewer.removeEventListener('load', onLoad);
+          modelViewer.removeEventListener('model-loaded', onLoad);
           resolve();
         };
 
+        // Listen for both 'load' and 'model-loaded' events
         modelViewer.addEventListener('load', onLoad);
+        modelViewer.addEventListener('model-loaded', onLoad);
         
-        // If already loaded, resolve immediately
-        if (modelViewer.loaded) {
+        // Check again if it loaded while we were setting up listeners
+        if (modelViewer.loaded === true) {
           clearTimeout(timeout);
           modelViewer.removeEventListener('load', onLoad);
+          modelViewer.removeEventListener('model-loaded', onLoad);
           resolve();
         }
       });
     }
 
     // Small delay before activating AR to ensure everything is ready
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Now activate AR
+    // Now activate AR - this should open the camera/AR view directly
     try {
       await modelViewer.activateAR();
+      // If AR activation succeeds, restore original style (though AR might navigate away)
+      modelViewer.style.cssText = originalStyle;
     } catch (error) {
+      // Restore original style on error
+      modelViewer.style.cssText = originalStyle;
       console.error('AR activation error:', error);
-      // If AR activation fails, it might be because the browser doesn't support it
-      // or the AR mode requires navigation (like scene-viewer)
-      throw error;
+      // Re-throw with a more specific error
+      throw new Error(`AR activation failed: ${error.message || 'Unknown error'}`);
     }
   }, [ensureModelViewer]);
 
@@ -207,15 +258,19 @@ export default function ARPreviewButton({
 
   const handleStartAR = useCallback(async () => {
     setShowInstructions(false);
+    // Don't set isActivating to false immediately - let AR open
+    // If it fails, we'll handle it in the catch block
     try {
       await activateAR();
+      // If AR activation succeeds, the AR view should be open now
+      // Don't reset isActivating here as AR might have navigated away
     } catch (error) {
       console.error('Failed to start AR:', error);
-      handlePermissionDenied(error);
-    } finally {
+      // Use different error handler for AR activation errors
+      handleARActivationError(error);
       setIsActivating(false);
     }
-  }, [activateAR, handlePermissionDenied]);
+  }, [activateAR, handleARActivationError]);
 
   const sharedAttributes = useMemo(
     () => ({
@@ -241,7 +296,7 @@ export default function ARPreviewButton({
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4">
           <div className="w-full max-w-xs rounded-lg bg-white p-6 text-center shadow-xl">
             <h2 className="mb-2 text-lg font-semibold text-gray-900">
-              Camera Permission Needed
+              {dialogState.title || 'Camera Permission Needed'}
             </h2>
             <p className="mb-6 text-sm text-gray-700">
               {dialogState.message}
@@ -250,7 +305,7 @@ export default function ARPreviewButton({
               type="button"
               className="w-full rounded-md bg-[#623183] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#4e2667] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4e2667]/70"
               onClick={() => {
-                setDialogState({ open: false, message: '' });
+                setDialogState({ open: false, message: '', title: 'Camera Permission Needed' });
                 if (buttonRef.current) {
                   buttonRef.current.focus({ preventScroll: true });
                   buttonRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
