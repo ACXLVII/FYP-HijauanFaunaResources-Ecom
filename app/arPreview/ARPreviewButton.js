@@ -24,9 +24,11 @@ export default function ARPreviewButton({
   const buttonRef = useRef(null);
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [dialogState, setDialogState] = useState({ open: false, message: '', title: 'Camera Permission Needed' });
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showARViewer, setShowARViewer] = useState(false);
 
   const ensureModelViewer = useCallback(async () => {
     if (typeof window === 'undefined') return;
@@ -48,6 +50,12 @@ export default function ARPreviewButton({
     if (typeof window === 'undefined') return;
 
     setIsClient(true);
+    
+    // Detect iOS
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOS(isIOSDevice);
+
     ensureModelViewer().then(() => {
       // Preload the model when component mounts so it's ready when user clicks AR
       if (modelViewerRef.current && modelSrc) {
@@ -55,6 +63,10 @@ export default function ARPreviewButton({
         const modelViewer = modelViewerRef.current;
         if (!modelViewer.src && modelSrc) {
           modelViewer.src = modelSrc;
+        }
+        // For iOS, also ensure USDZ is set
+        if (isIOSDevice && iosSrc && !modelViewer.getAttribute('ios-src')) {
+          modelViewer.setAttribute('ios-src', iosSrc);
         }
       }
     });
@@ -71,7 +83,7 @@ export default function ARPreviewButton({
     return () => {
       mediaQuery.removeEventListener('change', updateIsMobile);
     };
-  }, [ensureModelViewer, modelSrc]);
+  }, [ensureModelViewer, modelSrc, iosSrc]);
 
   const stopStreamTracks = useCallback((stream) => {
     if (!stream) return;
@@ -178,6 +190,26 @@ export default function ARPreviewButton({
       throw new Error('Model source not set');
     }
 
+    // For iOS, ensure USDZ is set and verify it loads
+    if (isIOS && iosSrc) {
+      if (!modelViewer.getAttribute('ios-src')) {
+        modelViewer.setAttribute('ios-src', iosSrc);
+      }
+      
+      // Verify USDZ file exists and is accessible
+      try {
+        const response = await fetch(iosSrc, { method: 'HEAD' });
+        if (!response.ok) {
+          console.warn('USDZ file may not be accessible:', iosSrc);
+        }
+      } catch (error) {
+        console.warn('Could not verify USDZ file:', error);
+      }
+      
+      // Wait a bit for USDZ to be recognized by model-viewer
+      await new Promise(resolve => setTimeout(resolve, 800));
+    }
+
     // Make model-viewer visible and fullscreen for WebXR AR activation
     // WebXR requires the element to be visible and in the viewport
     const originalStyle = modelViewer.style.cssText;
@@ -220,6 +252,15 @@ export default function ARPreviewButton({
       });
     }
 
+    // For iOS, show the model-viewer with AR button instead of programmatically activating
+    // This avoids the Quick Look dialog issue
+    if (isIOS) {
+      // Show the model-viewer directly with AR button visible
+      setShowARViewer(true);
+      setIsActivating(false);
+      return;
+    }
+
     // Small delay before activating AR to ensure everything is ready
     await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -228,6 +269,7 @@ export default function ARPreviewButton({
       // Set up event listener to restore style when AR session ends
       const restoreOnExit = () => {
         modelViewer.style.cssText = originalStyle;
+        setShowARViewer(false);
         modelViewer.removeEventListener('ar-status', restoreOnExit);
       };
       modelViewer.addEventListener('ar-status', (e) => {
@@ -245,6 +287,7 @@ export default function ARPreviewButton({
     } catch (error) {
       // Restore original style on error
       modelViewer.style.cssText = originalStyle;
+      setShowARViewer(false);
       console.error('AR activation error:', error);
       
       // Check if it's a WebXR-specific error
@@ -255,7 +298,7 @@ export default function ARPreviewButton({
       // Re-throw with a more specific error
       throw new Error(`AR activation failed: ${error.message || 'Unknown error'}`);
     }
-  }, [ensureModelViewer]);
+  }, [ensureModelViewer, isIOS, iosSrc]);
 
   const handleClick = useCallback(async () => {
     if (!isClient || !isMobile || isActivating) {
@@ -293,17 +336,23 @@ export default function ARPreviewButton({
   }, [activateAR, handleARActivationError]);
 
   const sharedAttributes = useMemo(
-    () => ({
-      src: modelSrc,
-      'ios-src': iosSrc,
-      ...(posterSrc ? { poster: posterSrc } : {}),
-      ar: true,
-      'ar-modes': arModes,
-      'ar-placement': arPlacement,
-      'camera-controls': true,
-      'auto-rotate': true,
-    }),
-    [arModes, arPlacement, iosSrc, modelSrc, posterSrc],
+    () => {
+      // For iOS, prioritize quick-look but also try webxr
+      // For others, prioritize webxr
+      const modes = isIOS ? 'webxr quick-look' : 'webxr scene-viewer quick-look';
+      return {
+        src: modelSrc,
+        'ios-src': iosSrc,
+        ...(posterSrc ? { poster: posterSrc } : {}),
+        ar: true,
+        'ar-modes': modes,
+        'ar-placement': arPlacement,
+        'camera-controls': true,
+        'auto-rotate': true,
+        'interaction-policy': 'allow-when-focused',
+      };
+    },
+    [isIOS, arPlacement, iosSrc, modelSrc, posterSrc],
   );
 
   if (!isClient || !isMobile) {
@@ -398,12 +447,40 @@ export default function ARPreviewButton({
       </button>
 
       {/* Render the model-viewer element only on the client to avoid SSR mismatch. */}
-      {/* Initially hidden, will be made visible when AR is activated for WebXR */}
-      <model-viewer
-        ref={modelViewerRef}
-        style={{ display: 'none', width: '100vw', height: '100vh' }}
-        {...sharedAttributes}
-      />
+      {/* For iOS, show it when AR viewer is activated. For others, keep it hidden until AR activates */}
+      {showARViewer ? (
+        <div className="fixed inset-0 z-[9999] bg-black">
+          <div className="absolute top-4 right-4 z-[10000]">
+            <button
+              type="button"
+              onClick={() => {
+                setShowARViewer(false);
+                setIsActivating(false);
+                if (modelViewerRef.current) {
+                  modelViewerRef.current.style.cssText = 'display: none;';
+                }
+              }}
+              className="rounded-full bg-white/90 p-2 shadow-lg"
+              aria-label="Close AR"
+            >
+              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <model-viewer
+            ref={modelViewerRef}
+            style={{ width: '100vw', height: '100vh', display: 'block' }}
+            {...sharedAttributes}
+          />
+        </div>
+      ) : (
+        <model-viewer
+          ref={modelViewerRef}
+          style={{ display: 'none', width: '100vw', height: '100vh' }}
+          {...sharedAttributes}
+        />
+      )}
     </>
   );
 }
