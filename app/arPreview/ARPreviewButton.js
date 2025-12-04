@@ -29,22 +29,35 @@ export default function ARPreviewButton({
   const [dialogState, setDialogState] = useState({ open: false, message: '', title: 'Camera Permission Needed' });
   const [showInstructions, setShowInstructions] = useState(false);
   const [showARViewer, setShowARViewer] = useState(false);
+  const [debugLogs, setDebugLogs] = useState([]);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
+  // Debug logging function
+  const addDebugLog = useCallback((message, type = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = { timestamp, message, type };
+    setDebugLogs(prev => [...prev.slice(-19), logEntry]); // Keep last 20 logs
+    console.log(`[AR Debug ${timestamp}]`, message);
+  }, []);
 
   const ensureModelViewer = useCallback(async () => {
     if (typeof window === 'undefined') return;
     if (window.customElements?.get('model-viewer')) {
       // Wait for custom element to be defined if it exists
       await window.customElements.whenDefined('model-viewer');
+      addDebugLog('Model-viewer already loaded', 'success');
       return;
     }
     try {
       await import('@google/model-viewer');
       // Wait for custom element to be defined
       await window.customElements.whenDefined('model-viewer');
+      addDebugLog('Model-viewer loaded successfully', 'success');
     } catch (error) {
+      addDebugLog(`Failed to load model-viewer: ${error.message}`, 'error');
       console.warn('Failed to load @google/model-viewer', error);
     }
-  }, []);
+  }, [addDebugLog]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -152,18 +165,23 @@ export default function ARPreviewButton({
   );
 
   const activateAR = useCallback(async () => {
+    addDebugLog('Starting AR activation...', 'info');
+    
     if (!modelViewerRef.current) {
+      addDebugLog('ERROR: Model viewer not available', 'error');
       throw new Error('Model viewer not available');
     }
 
     // Wait for model-viewer to be fully loaded
     const modelViewer = modelViewerRef.current;
+    addDebugLog('Model-viewer element found', 'success');
     
     // Ensure model-viewer web component is defined
     await ensureModelViewer();
     
     // Small delay to ensure element is ready
     await new Promise(resolve => setTimeout(resolve, 100));
+    addDebugLog('Element ready check complete', 'info');
     
     // Check if model-viewer is ready
     if (typeof modelViewer.activateAR !== 'function') {
@@ -192,22 +210,79 @@ export default function ARPreviewButton({
 
     // For iOS, ensure USDZ is set and verify it loads
     if (isIOS && iosSrc) {
-      if (!modelViewer.getAttribute('ios-src')) {
-        modelViewer.setAttribute('ios-src', iosSrc);
+      // Make sure the model-viewer is in the DOM before setting attributes
+      if (modelViewer.parentNode === null) {
+        document.body.appendChild(modelViewer);
       }
       
-      // Verify USDZ file exists and is accessible
+      // Ensure ios-src is an absolute URL (required for Quick Look)
+      let absoluteIosSrc = iosSrc;
+      if (!iosSrc.startsWith('http')) {
+        // Make it an absolute URL using the current origin
+        absoluteIosSrc = `${window.location.origin}${iosSrc.startsWith('/') ? '' : '/'}${iosSrc}`;
+      }
+      
+      addDebugLog(`Setting iOS USDZ source: ${absoluteIosSrc}`, 'info');
+      console.log('Setting iOS USDZ source:', absoluteIosSrc);
+      
+      // Set ios-src attribute - this must be done before activation
+      const currentIosSrc = modelViewer.getAttribute('ios-src');
+      if (currentIosSrc !== absoluteIosSrc) {
+        modelViewer.setAttribute('ios-src', absoluteIosSrc);
+      }
+      
+      // Verify USDZ file exists and is accessible with proper headers
       try {
-        const response = await fetch(iosSrc, { method: 'HEAD' });
+        const response = await fetch(absoluteIosSrc, { 
+          method: 'HEAD',
+          headers: {
+            'Accept': 'model/vnd.usdz+zip, application/octet-stream, */*'
+          }
+        });
+        
         if (!response.ok) {
-          console.warn('USDZ file may not be accessible:', iosSrc);
+          const errorMsg = `USDZ file not accessible: ${response.status}`;
+          addDebugLog(errorMsg, 'error');
+          console.error('USDZ file not accessible:', absoluteIosSrc, 'Status:', response.status);
+          throw new Error(`USDZ file not accessible: ${response.status}`);
+        } else {
+          const contentType = response.headers.get('content-type');
+          const contentLength = response.headers.get('content-length');
+          const fileSize = contentLength ? `${(parseInt(contentLength) / 1024).toFixed(2)} KB` : 'unknown';
+          
+          addDebugLog(`USDZ verified: ${fileSize} (${contentType || 'no type'})`, 'success');
+          console.log('USDZ file verified:', {
+            url: absoluteIosSrc,
+            contentType,
+            contentLength: fileSize
+          });
+          
+          if (contentLength === '0' || contentLength === null) {
+            addDebugLog('WARNING: USDZ file appears empty or missing content-length', 'error');
+            console.warn('USDZ file appears to be empty or content-length header missing');
+          }
         }
       } catch (error) {
-        console.warn('Could not verify USDZ file:', error);
+        addDebugLog(`Could not verify USDZ: ${error.message}`, 'error');
+        console.error('Could not verify USDZ file:', error);
+        // Don't throw here - let it try anyway, sometimes fetch fails but file is accessible
       }
       
-      // Wait a bit for USDZ to be recognized by model-viewer
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Wait for USDZ to be recognized by model-viewer
+      // iOS Quick Look needs time to process the USDZ file
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Double-check the attribute was set
+      const finalIosSrc = modelViewer.getAttribute('ios-src');
+      if (finalIosSrc !== absoluteIosSrc) {
+        const errorMsg = `Failed to set ios-src. Expected: ${absoluteIosSrc}, Got: ${finalIosSrc}`;
+        addDebugLog(errorMsg, 'error');
+        console.error('Failed to set ios-src attribute. Expected:', absoluteIosSrc, 'Got:', finalIosSrc);
+        throw new Error('Failed to set iOS USDZ source');
+      }
+      
+      addDebugLog(`iOS USDZ source confirmed: ${finalIosSrc}`, 'success');
+      console.log('iOS USDZ source confirmed:', finalIosSrc);
     }
 
     // Make model-viewer visible and fullscreen for WebXR AR activation
@@ -252,13 +327,33 @@ export default function ARPreviewButton({
       });
     }
 
-    // For iOS, show the model-viewer with AR button instead of programmatically activating
-    // This avoids the Quick Look dialog issue
+    // For iOS, Quick Look requires the USDZ to be fully loaded and accessible
+    // The "Open this 3D model?" dialog is expected iOS behavior
+    // After user clicks Allow, Quick Look should open with the camera
     if (isIOS) {
-      // Show the model-viewer directly with AR button visible
-      setShowARViewer(true);
-      setIsActivating(false);
-      return;
+      // Ensure ios-src is set (already done above, but verify)
+      if (iosSrc && modelViewer.getAttribute('ios-src') !== iosSrc) {
+        modelViewer.setAttribute('ios-src', iosSrc);
+        // Wait for iOS to recognize the USDZ file
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Try to activate AR - on iOS this will use Quick Look
+      // This will show the "Open this 3D model?" dialog, which is expected
+      try {
+        addDebugLog('Attempting to activate AR (Quick Look)...', 'info');
+        await modelViewer.activateAR();
+        addDebugLog('AR activation successful - Quick Look dialog should appear', 'success');
+        // If successful, Quick Look dialog will appear (expected on iOS)
+        // User needs to click "Allow" to proceed to AR view
+        // The "Zero KB" issue might be due to USDZ not loading properly
+        return;
+      } catch (error) {
+        const errorMsg = `iOS AR activation failed: ${error.message || 'Unknown error'}`;
+        addDebugLog(errorMsg, 'error');
+        console.error('iOS AR activation failed:', error);
+        throw new Error(errorMsg);
+      }
     }
 
     // Small delay before activating AR to ensure everything is ready
@@ -361,6 +456,71 @@ export default function ARPreviewButton({
 
   return (
     <>
+      {/* Debug Panel - Tap and hold AR button to show/hide */}
+      {showDebugPanel && (
+        <div className="fixed bottom-4 left-4 right-4 z-[10001] max-h-[40vh] overflow-y-auto bg-black/90 text-white p-3 rounded-lg text-xs font-mono border border-white/20">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-sm">AR Debug Logs</h3>
+            <button
+              onClick={() => {
+                setShowDebugPanel(false);
+                setDebugLogs([]);
+              }}
+              className="text-white/70 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="space-y-1">
+            {debugLogs.length === 0 ? (
+              <div className="text-white/50">No logs yet. Try AR Preview to see logs.</div>
+            ) : (
+              debugLogs.map((log, idx) => (
+                <div
+                  key={idx}
+                  className={`p-1 rounded ${
+                    log.type === 'error'
+                      ? 'bg-red-500/20 text-red-200'
+                      : log.type === 'success'
+                      ? 'bg-green-500/20 text-green-200'
+                      : 'bg-blue-500/20 text-blue-200'
+                  }`}
+                >
+                  <span className="text-white/50">[{log.timestamp}]</span>{' '}
+                  <span>{log.message}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Debug Toggle - Long press AR button to show debug panel */}
+      {isClient && isMobile && (
+        <div
+          className="fixed bottom-20 right-4 z-[10000]"
+          onTouchStart={(e) => {
+            const startTime = Date.now();
+            const touchEnd = () => {
+              const duration = Date.now() - startTime;
+              if (duration > 1000) {
+                // Long press detected
+                setShowDebugPanel(!showDebugPanel);
+              }
+              document.removeEventListener('touchend', touchEnd);
+            };
+            document.addEventListener('touchend', touchEnd, { once: true });
+          }}
+        >
+          <button
+            className="bg-purple-600/80 text-white text-xs px-2 py-1 rounded"
+            onClick={() => setShowDebugPanel(!showDebugPanel)}
+          >
+            {showDebugPanel ? 'Hide' : 'Show'} Debug
+          </button>
+        </div>
+      )}
+
       {dialogState.open && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4">
           <div className="w-full max-w-xs rounded-lg bg-white p-6 text-center shadow-xl">
