@@ -338,21 +338,21 @@ export default function ARPreviewButton({
         await new Promise(resolve => setTimeout(resolve, 500));
       }
       
-      // Try to activate AR - on iOS this will use Quick Look
-      // This will show the "Open this 3D model?" dialog, which is expected
+      // Try to activate AR programmatically - this will show Quick Look dialog
+      // If it fails, we'll show the model-viewer with AR button
       try {
-        addDebugLog('Attempting to activate AR (Quick Look)...', 'info');
+        addDebugLog('iOS: Attempting to activate AR (Quick Look)...', 'info');
         await modelViewer.activateAR();
-        addDebugLog('AR activation successful - Quick Look dialog should appear', 'success');
+        addDebugLog('iOS: AR activation initiated - Quick Look dialog should appear', 'success');
         // If successful, Quick Look dialog will appear (expected on iOS)
-        // User needs to click "Allow" to proceed to AR view
-        // The "Zero KB" issue might be due to USDZ not loading properly
+        // User needs to click "Allow" to proceed to AR view with camera
         return;
       } catch (error) {
-        const errorMsg = `iOS AR activation failed: ${error.message || 'Unknown error'}`;
-        addDebugLog(errorMsg, 'error');
-        console.error('iOS AR activation failed:', error);
-        throw new Error(errorMsg);
+        addDebugLog(`iOS: AR activation failed, showing model-viewer: ${error.message}`, 'error');
+        // If activation fails, show the model-viewer with AR button for manual activation
+        setShowARViewer(true);
+        setIsActivating(false);
+        return;
       }
     }
 
@@ -361,15 +361,20 @@ export default function ARPreviewButton({
 
     // Now activate AR - WebXR should open the camera/AR view directly in browser
     try {
+      addDebugLog('Attempting to activate WebXR AR...', 'info');
+      
       // Set up event listener to restore style when AR session ends
       const restoreOnExit = () => {
         modelViewer.style.cssText = originalStyle;
         setShowARViewer(false);
+        addDebugLog('AR session ended', 'info');
         modelViewer.removeEventListener('ar-status', restoreOnExit);
       };
       modelViewer.addEventListener('ar-status', (e) => {
         if (e.detail.status === 'not-presenting') {
           restoreOnExit();
+        } else if (e.detail.status === 'presenting') {
+          addDebugLog('AR session active - camera should be visible', 'success');
         }
       });
 
@@ -377,12 +382,15 @@ export default function ARPreviewButton({
       // It will handle the fullscreen AR experience and show the camera
       await modelViewer.activateAR();
       
+      addDebugLog('WebXR AR activated successfully', 'success');
       // If WebXR is active, the model-viewer will show the camera view
       // The style will be restored when AR session ends via the event listener
     } catch (error) {
       // Restore original style on error
       modelViewer.style.cssText = originalStyle;
       setShowARViewer(false);
+      const errorMsg = `AR activation error: ${error.message || 'Unknown error'}`;
+      addDebugLog(errorMsg, 'error');
       console.error('AR activation error:', error);
       
       // Check if it's a WebXR-specific error
@@ -391,7 +399,7 @@ export default function ARPreviewButton({
       }
       
       // Re-throw with a more specific error
-      throw new Error(`AR activation failed: ${error.message || 'Unknown error'}`);
+      throw new Error(errorMsg);
     }
   }, [ensureModelViewer, isIOS, iosSrc]);
 
