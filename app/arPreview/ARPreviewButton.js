@@ -14,7 +14,7 @@ export default function ARPreviewButton({
   modelSrc,
   iosSrc,
   posterSrc,
-  arModes = 'scene-viewer quick-look webxr',
+  arModes = 'webxr scene-viewer quick-look',
   arPlacement = 'floor',
   className = '',
   onPermissionDenied,
@@ -178,11 +178,11 @@ export default function ARPreviewButton({
       throw new Error('Model source not set');
     }
 
-    // Make model-viewer have proper dimensions for AR activation
-    // Some AR implementations require the element to have dimensions in the viewport
+    // Make model-viewer visible and fullscreen for WebXR AR activation
+    // WebXR requires the element to be visible and in the viewport
     const originalStyle = modelViewer.style.cssText;
-    // Give it dimensions but keep it visually hidden
-    modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; opacity: 0; pointer-events: none; z-index: -1;';
+    // Make it fullscreen and visible for WebXR to work properly
+    modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: #000;';
 
     // Wait for the model to load if it hasn't already
     // Check if model is already loaded
@@ -223,15 +223,35 @@ export default function ARPreviewButton({
     // Small delay before activating AR to ensure everything is ready
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Now activate AR - this should open the camera/AR view directly
+    // Now activate AR - WebXR should open the camera/AR view directly in browser
     try {
+      // Set up event listener to restore style when AR session ends
+      const restoreOnExit = () => {
+        modelViewer.style.cssText = originalStyle;
+        modelViewer.removeEventListener('ar-status', restoreOnExit);
+      };
+      modelViewer.addEventListener('ar-status', (e) => {
+        if (e.detail.status === 'not-presenting') {
+          restoreOnExit();
+        }
+      });
+
+      // For WebXR, the model-viewer needs to be visible and fullscreen
+      // It will handle the fullscreen AR experience and show the camera
       await modelViewer.activateAR();
-      // If AR activation succeeds, restore original style (though AR might navigate away)
-      modelViewer.style.cssText = originalStyle;
+      
+      // If WebXR is active, the model-viewer will show the camera view
+      // The style will be restored when AR session ends via the event listener
     } catch (error) {
       // Restore original style on error
       modelViewer.style.cssText = originalStyle;
       console.error('AR activation error:', error);
+      
+      // Check if it's a WebXR-specific error
+      if (error.message && error.message.includes('webxr')) {
+        throw new Error(`WebXR AR is not supported on this device. Please try a different browser or device.`);
+      }
+      
       // Re-throw with a more specific error
       throw new Error(`AR activation failed: ${error.message || 'Unknown error'}`);
     }
@@ -378,9 +398,10 @@ export default function ARPreviewButton({
       </button>
 
       {/* Render the model-viewer element only on the client to avoid SSR mismatch. */}
+      {/* Initially hidden, will be made visible when AR is activated for WebXR */}
       <model-viewer
         ref={modelViewerRef}
-        style={{ display: 'none' }}
+        style={{ display: 'none', width: '100vw', height: '100vh' }}
         {...sharedAttributes}
       />
     </>
