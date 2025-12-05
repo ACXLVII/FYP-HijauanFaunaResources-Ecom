@@ -31,6 +31,7 @@ export default function ARPreviewButton({
   const [showARViewer, setShowARViewer] = useState(false);
   const [debugLogs, setDebugLogs] = useState([]);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [isARLoading, setIsARLoading] = useState(false);
 
   // Debug logging function
   const addDebugLog = useCallback((message, type = 'info') => {
@@ -265,15 +266,22 @@ export default function ARPreviewButton({
           });
           
           if (actualSize === 0) {
-            const errorMsg = 'USDZ file is empty (0 bytes)';
+            const errorMsg = 'USDZ file is empty (0 bytes) - file may not be served correctly';
             addDebugLog(errorMsg, 'error');
             throw new Error(errorMsg);
           }
           
           // Check if content-type is correct for USDZ
           if (contentType && !contentType.includes('usdz') && !contentType.includes('octet-stream') && !contentType.includes('zip')) {
-            addDebugLog(`WARNING: Unexpected content-type: ${contentType}`, 'error');
+            addDebugLog(`WARNING: Unexpected content-type: ${contentType}. Expected: model/vnd.usdz+zip`, 'error');
+            addDebugLog('This may cause Quick Look to show "Zero KB". Please restart your Next.js server after updating next.config.mjs', 'error');
+          } else if (contentType && contentType.includes('usdz')) {
+            addDebugLog('Content-Type is correct for USDZ', 'success');
           }
+          
+          // For Quick Look, the file must be accessible via the exact URL
+          // Quick Look may cache or have issues, so we log the exact URL being used
+          addDebugLog(`Quick Look will use URL: ${absoluteIosSrc}`, 'info');
         }
       } catch (error) {
         addDebugLog(`Could not verify USDZ: ${error.message}`, 'error');
@@ -311,18 +319,21 @@ export default function ARPreviewButton({
                           (modelViewer.shadowRoot && modelViewer.shadowRoot.querySelector('canvas'));
     
     if (!isModelLoaded) {
+      addDebugLog('Waiting for 3D model to load...', 'info');
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           modelViewer.removeEventListener('load', onLoad);
           modelViewer.removeEventListener('model-loaded', onLoad);
           modelViewer.style.cssText = originalStyle;
-          reject(new Error('Model loading timeout'));
-        }, 15000); // 15 second timeout
+          addDebugLog('Model loading timeout - model may be too large', 'error');
+          reject(new Error('Model loading timeout - the 3D model file may be too large or slow to load'));
+        }, 20000); // 20 second timeout (increased for large models)
 
         const onLoad = () => {
           clearTimeout(timeout);
           modelViewer.removeEventListener('load', onLoad);
           modelViewer.removeEventListener('model-loaded', onLoad);
+          addDebugLog('3D model loaded successfully', 'success');
           resolve();
         };
 
@@ -335,9 +346,12 @@ export default function ARPreviewButton({
           clearTimeout(timeout);
           modelViewer.removeEventListener('load', onLoad);
           modelViewer.removeEventListener('model-loaded', onLoad);
+          addDebugLog('3D model already loaded', 'success');
           resolve();
         }
       });
+    } else {
+      addDebugLog('3D model already loaded', 'success');
     }
 
     // For iOS, Quick Look requires the USDZ to be fully loaded and accessible
@@ -351,21 +365,37 @@ export default function ARPreviewButton({
         await new Promise(resolve => setTimeout(resolve, 500));
       }
       
+      // For iOS Quick Look, we need to ensure the USDZ URL is accessible
+      // Quick Look requires the file to be directly accessible via HTTPS
       // Try to activate AR programmatically - this will show Quick Look dialog
-      // If it fails, we'll show the model-viewer with AR button
       try {
         addDebugLog('iOS: Attempting to activate AR (Quick Look)...', 'info');
+        addDebugLog(`iOS: Using USDZ URL: ${absoluteIosSrc}`, 'info');
+        
+        // Double-check the URL is absolute and accessible
+        if (!absoluteIosSrc.startsWith('http')) {
+          throw new Error('USDZ URL must be absolute for Quick Look');
+        }
+        
+        // Ensure the model-viewer has the correct ios-src before activating
+        modelViewer.setAttribute('ios-src', absoluteIosSrc);
+        
+        // Small delay to ensure attribute is set
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Now try to activate AR
         await modelViewer.activateAR();
         addDebugLog('iOS: AR activation initiated - Quick Look dialog should appear', 'success');
         // If successful, Quick Look dialog will appear (expected on iOS)
         // User needs to click "Allow" to proceed to AR view with camera
         return;
       } catch (error) {
-        addDebugLog(`iOS: AR activation failed, showing model-viewer: ${error.message}`, 'error');
-        // If activation fails, show the model-viewer with AR button for manual activation
-        setShowARViewer(true);
-        setIsActivating(false);
-        return;
+        const errorMsg = `iOS: AR activation failed: ${error.message}`;
+        addDebugLog(errorMsg, 'error');
+        console.error('iOS AR activation error:', error);
+        
+        // If activation fails, show error to user
+        throw new Error(`Failed to open AR: ${error.message}. Please ensure you're using HTTPS and the USDZ file is accessible.`);
       }
     }
 
@@ -437,19 +467,26 @@ export default function ARPreviewButton({
 
   const handleStartAR = useCallback(async () => {
     setShowInstructions(false);
+    setIsARLoading(true);
+    addDebugLog('Starting AR activation...', 'info');
+    
     // Don't set isActivating to false immediately - let AR open
     // If it fails, we'll handle it in the catch block
     try {
       await activateAR();
+      addDebugLog('AR activation completed', 'success');
       // If AR activation succeeds, the AR view should be open now
       // Don't reset isActivating here as AR might have navigated away
+      setIsARLoading(false);
     } catch (error) {
       console.error('Failed to start AR:', error);
+      addDebugLog(`AR activation failed: ${error.message}`, 'error');
       // Use different error handler for AR activation errors
       handleARActivationError(error);
       setIsActivating(false);
+      setIsARLoading(false);
     }
-  }, [activateAR, handleARActivationError]);
+  }, [activateAR, handleARActivationError, addDebugLog]);
 
   const sharedAttributes = useMemo(
     () => {
@@ -464,8 +501,11 @@ export default function ARPreviewButton({
         'ar-modes': modes,
         'ar-placement': arPlacement,
         'camera-controls': true,
-        'auto-rotate': true,
+        'auto-rotate': false, // Disable auto-rotate in AR for better performance
         'interaction-policy': 'allow-when-focused',
+        'reveal': 'auto', // Auto-reveal when loaded
+        'loading': 'eager', // Load model eagerly
+        'preload': true, // Preload the model
       };
     },
     [isIOS, arPlacement, iosSrc, modelSrc, posterSrc],
