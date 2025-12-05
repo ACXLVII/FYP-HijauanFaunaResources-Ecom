@@ -18,12 +18,14 @@ const nextConfig = {
       },
     ];
   },
-  // Use rewrites to serve USDZ files through API route with proper MIME type
+  // Use rewrites to serve all model files through API route with proper MIME types
   async rewrites() {
     return [
       {
-        source: '/models/:path*.usdz',
-        destination: '/api/models/models/:path*.usdz',
+        // Match: /models/live_grass/philippine.usdz → /api/models/models/live_grass/philippine.usdz
+        // Match: /models/artificial_grass/15mm.usdz → /api/models/models/artificial_grass/15mm.usdz
+        source: '/models/:category/:file',
+        destination: '/api/models/models/:category/:file',
       },
     ];
   },

@@ -133,8 +133,8 @@ export default function SectionGrades() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
                   <ARPreviewButton
                     className="p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/economy.glb"
-                    iosSrc="/models/artificial_grass/economy.usdz"
+                    modelSrc="/models/artificial_grass/25mm.glb"
+                    iosSrc="/models/artificial_grass/25mm.usdz"
                     posterSrc="/images/artificial_grass/grades/economy/image1.jpg"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">

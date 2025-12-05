@@ -128,8 +128,8 @@ export default function SectionThickness() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/economy.glb"
-                    iosSrc="/models/artificial_grass/economy.usdz"
+                    modelSrc="/models/artificial_grass/15mm.glb"
+                    iosSrc="/models/artificial_grass/15mm.usdz"
                     posterSrc="/images/artificial_grass/thicknesses/15mmGolf.jpg"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -189,8 +189,8 @@ export default function SectionThickness() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/economy.glb"
-                    iosSrc="/models/artificial_grass/economy.usdz"
+                    modelSrc="/models/artificial_grass/25mm.glb"
+                    iosSrc="/models/artificial_grass/25mm.usdz"
                     posterSrc="/images/artificial_grass/thicknesses/25mm.jpg"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -250,8 +250,8 @@ export default function SectionThickness() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/economy.glb"
-                    iosSrc="/models/artificial_grass/economy.usdz"
+                    modelSrc="/models/artificial_grass/30mm.glb"
+                    iosSrc="/models/artificial_grass/30mm.usdz"
                     posterSrc="/images/artificial_grass/thicknesses/30mm.jpg"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -311,8 +311,8 @@ export default function SectionThickness() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/economy.glb"
-                    iosSrc="/models/artificial_grass/economy.usdz"
+                    modelSrc="/models/artificial_grass/35mm.glb"
+                    iosSrc="/models/artificial_grass/35mm.usdz"
                     posterSrc="/images/artificial_grass/thicknesses/35mm.jpg"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -372,8 +372,8 @@ export default function SectionThickness() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   <ARPreviewButton
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/economy.glb"
-                    iosSrc="/models/artificial_grass/economy.usdz"
+                    modelSrc="/models/artificial_grass/40mm.glb"
+                    iosSrc="/models/artificial_grass/40mm.usdz"
                     posterSrc="/images/artificial_grass/thicknesses/40mm.jpg"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
