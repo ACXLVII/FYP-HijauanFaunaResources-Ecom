@@ -3,17 +3,9 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Apply headers to all USDZ files
-        source: '/models/:path*.usdz',
+        // Apply headers to all USDZ files in public/models
+        source: '/models/:path*',
         headers: [
-          {
-            key: 'Content-Type',
-            value: 'model/vnd.usdz+zip',
-          },
-          {
-            key: 'Content-Disposition',
-            value: 'inline; filename=":path*.usdz"',
-          },
           {
             key: 'Access-Control-Allow-Origin',
             value: '*',
@@ -22,29 +14,16 @@ const nextConfig = {
             key: 'Access-Control-Allow-Methods',
             value: 'GET, HEAD, OPTIONS',
           },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type',
-          },
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
         ],
       },
+    ];
+  },
+  // Use rewrites to serve USDZ files through API route with proper MIME type
+  async rewrites() {
+    return [
       {
-        // Also apply to GLB files for consistency
-        source: '/models/:path*.glb',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'model/gltf-binary',
-          },
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-        ],
+        source: '/models/:path*.usdz',
+        destination: '/api/models/models/:path*.usdz',
       },
     ];
   },
