@@ -93,9 +93,31 @@ export default function ARPreviewButton({
     try {
       const modelViewer = modelViewerRef.current;
       
+      // Setup AR session end listener BEFORE activating
+      const handleAREnd = () => {
+        console.log('AR session ended - hiding model-viewer');
+        if (modelViewerRef.current) {
+          modelViewerRef.current.style.cssText = 'display: none !important; position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; visibility: hidden; opacity: 0; pointer-events: none;';
+        }
+        setIsActivating(false);
+      };
+      
+      modelViewer.addEventListener('ar-status', (event) => {
+        console.log('AR status:', event.detail.status);
+        if (event.detail.status === 'not-presenting' || event.detail.status === 'failed') {
+          setTimeout(handleAREnd, 100); // Small delay to ensure cleanup
+        }
+      });
+      
+      // Also listen for error events
+      const errorHandler = () => {
+        console.log('AR error event');
+        setTimeout(handleAREnd, 100);
+      };
+      modelViewer.addEventListener('error', errorHandler, { once: true });
+      
       // Make model-viewer visible for AR activation
-      const originalStyle = modelViewer.style.cssText;
-      modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block;';
+      modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block; visibility: visible; opacity: 1;';
       
       // Wait for model to load if needed
       if (!modelViewer.loaded) {
@@ -123,26 +145,18 @@ export default function ARPreviewButton({
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
         // AR activated successfully
-        // Don't reset isActivating - let AR session continue
+        // Cleanup happens in ar-status event listener
       } else {
         throw new Error('AR not available on this device or browser.');
       }
-      
-      // Listen for AR session end to restore style
-      modelViewer.addEventListener('ar-status', (event) => {
-        if (event.detail.status === 'not-presenting') {
-          modelViewer.style.cssText = 'display: none;';
-          setIsActivating(false);
-        }
-      }, { once: true });
       
     } catch (err) {
       console.error('AR activation error:', err);
       setError(err.message || 'Failed to start AR. Please try again or use a different device.');
       setIsActivating(false);
-      // Restore original style on error
+      // Completely hide model-viewer on error
       if (modelViewerRef.current) {
-        modelViewerRef.current.style.cssText = 'display: none;';
+        modelViewerRef.current.style.cssText = 'display: none !important; position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; visibility: hidden; opacity: 0; pointer-events: none;';
       }
     }
   }, []);
@@ -251,7 +265,17 @@ export default function ARPreviewButton({
           ar-placement={arPlacement}
           camera-controls
           loading="eager"
-          style={{ display: 'none', width: '100vw', height: '100vh' }}
+          style={{ 
+            display: 'none',
+            position: 'fixed',
+            top: '-9999px',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            visibility: 'hidden',
+            opacity: 0,
+            pointerEvents: 'none'
+          }}
         />
       )}
     </>
