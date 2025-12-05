@@ -23,6 +23,7 @@ export default function ARPreviewButton({
   const [showInstructions, setShowInstructions] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
+  const [renderModelViewer, setRenderModelViewer] = useState(false);
 
   // Load model-viewer web component
   useEffect(() => {
@@ -55,23 +56,26 @@ export default function ARPreviewButton({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Force hide model-viewer when not activating
+  // Remove model-viewer from DOM when not activating
   useEffect(() => {
-    if (!isActivating && modelViewerRef.current) {
-      console.log('isActivating changed to false, forcing hide');
-      modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+    if (!isActivating) {
+      console.log('isActivating changed to false, removing model-viewer');
       setShowCloseButton(false);
+      setTimeout(() => {
+        setRenderModelViewer(false);
+      }, 100);
     }
   }, [isActivating]);
 
   // Manual close function
   const handleManualClose = useCallback(() => {
     console.log('Manual close triggered');
-    if (modelViewerRef.current) {
-      modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
-    }
     setIsActivating(false);
     setShowCloseButton(false);
+    // Remove model-viewer from DOM after a brief delay
+    setTimeout(() => {
+      setRenderModelViewer(false);
+    }, 100);
   }, []);
 
   // Request camera permission
@@ -101,26 +105,34 @@ export default function ARPreviewButton({
 
   // Start AR after instructions
   const handleStartAR = useCallback(async () => {
-    if (!modelViewerRef.current) {
-      setError('AR not available. Please refresh the page and try again.');
-      setShowInstructions(false);
-      return;
-    }
-
     setShowInstructions(false);
     setIsActivating(true);
+    
+    // Mount model-viewer first
+    setRenderModelViewer(true);
+    
+    // Wait for model-viewer to mount
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (!modelViewerRef.current) {
+      setError('AR not available. Please refresh the page and try again.');
+      setIsActivating(false);
+      setRenderModelViewer(false);
+      return;
+    }
 
     const modelViewer = modelViewerRef.current;
 
     try {
       // Hide model-viewer function
       const hideModelViewer = () => {
-        console.log('Hiding model-viewer');
-        if (modelViewerRef.current) {
-          modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
-        }
+        console.log('Hiding and removing model-viewer from DOM');
         setIsActivating(false);
         setShowCloseButton(false);
+        // Remove from DOM completely
+        setTimeout(() => {
+          setRenderModelViewer(false);
+        }, 100);
       };
       
       // Listen for visibility change (when user switches away from AR)
@@ -183,9 +195,6 @@ export default function ARPreviewButton({
         window.removeEventListener('pagehide', pageHideHandler);
       }, 300000); // 5 minutes
       
-      // Make model-viewer visible for AR activation
-      modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block; visibility: visible; opacity: 1;';
-      
       // Wait for model to load if needed
       if (!modelViewer.loaded) {
         await new Promise((resolve, reject) => {
@@ -209,10 +218,8 @@ export default function ARPreviewButton({
       // Activate AR
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
-        // AR activated - show close button after a delay
-        setTimeout(() => {
-          setShowCloseButton(true);
-        }, 2000);
+        // AR activated - show close button immediately
+        setShowCloseButton(true);
         // Cleanup handlers are set up above
       } else {
         clearInterval(checkInterval);
@@ -227,10 +234,11 @@ export default function ARPreviewButton({
       console.error('AR activation error:', err);
       setError(err.message || 'Failed to start AR. Please try again or use a different device.');
       setIsActivating(false);
-      // Force hide model-viewer
-      if (modelViewerRef.current) {
-        modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
-      }
+      setShowCloseButton(false);
+      // Remove model-viewer from DOM
+      setTimeout(() => {
+        setRenderModelViewer(false);
+      }, 100);
     }
   }, [isActivating]);
 
@@ -240,6 +248,11 @@ export default function ARPreviewButton({
 
   return (
     <>
+      {/* Fullscreen Overlay - blocks website interaction during AR */}
+      {isActivating && (
+        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" />
+      )}
+
       {/* Close Button Overlay - appears after AR is activated */}
       {showCloseButton && (
         <div className="fixed inset-0 z-[10000] flex items-start justify-center pt-4 px-4 pointer-events-none">
@@ -349,31 +362,30 @@ export default function ARPreviewButton({
         ) : children}
       </button>
 
-      {/* Hidden model-viewer - will be activated programmatically */}
-      {/* Android: Scene Viewer (direct camera) | iOS: Quick Look (AR dialog) */}
-      {isClient && (
-        <model-viewer
-          ref={modelViewerRef}
-          src={modelSrc}
-          ios-src={iosSrc}
-          poster={posterSrc}
-          ar
-          ar-modes="scene-viewer quick-look"
-          ar-placement={arPlacement}
-          camera-controls
-          loading="eager"
-          style={{ 
-            display: 'none',
-            position: 'fixed',
-            top: '-9999px',
-            left: '-9999px',
-            width: '1px',
-            height: '1px',
-            visibility: 'hidden',
-            opacity: 0,
-            pointerEvents: 'none'
-          }}
-        />
+      {/* Model-viewer - only rendered when AR is active */}
+      {/* Completely removed from DOM when not in use to prevent blocking */}
+      {isClient && renderModelViewer && (
+        <div className="fixed inset-0 z-[9999]" style={{ pointerEvents: 'none' }}>
+          <model-viewer
+            ref={modelViewerRef}
+            src={modelSrc}
+            ios-src={iosSrc}
+            poster={posterSrc}
+            ar
+            ar-modes="scene-viewer quick-look"
+            ar-placement={arPlacement}
+            camera-controls
+            loading="eager"
+            style={{ 
+              width: '100vw',
+              height: '100vh',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              pointerEvents: 'auto'
+            }}
+          />
+        </div>
       )}
     </>
   );
