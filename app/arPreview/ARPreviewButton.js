@@ -217,10 +217,17 @@ export default function ARPreviewButton({
       }
       
       // Ensure ios-src is an absolute URL (required for Quick Look)
+      // Use API route to serve USDZ with proper headers (fixes "Zero KB" issue)
       let absoluteIosSrc = iosSrc;
       if (!iosSrc.startsWith('http')) {
-        // Make it an absolute URL using the current origin
-        absoluteIosSrc = `${window.location.origin}${iosSrc.startsWith('/') ? '' : '/'}${iosSrc}`;
+        // Convert /models/... to /api/models/models/... to use API route with proper headers
+        // The API route expects the full path including 'models/'
+        if (iosSrc.startsWith('/models/')) {
+          absoluteIosSrc = `${window.location.origin}/api/models${iosSrc}`;
+        } else {
+          absoluteIosSrc = `${window.location.origin}${iosSrc.startsWith('/') ? '' : '/'}${iosSrc}`;
+        }
+        addDebugLog(`Using API route for USDZ: ${absoluteIosSrc}`, 'info');
       }
       
       addDebugLog(`Setting iOS USDZ source: ${absoluteIosSrc}`, 'info');
