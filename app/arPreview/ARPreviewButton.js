@@ -359,43 +359,34 @@ export default function ARPreviewButton({
     // After user clicks Allow, Quick Look should open with the camera
     if (isIOS) {
       // Ensure ios-src is set (already done above, but verify)
-      if (iosSrc && modelViewer.getAttribute('ios-src') !== iosSrc) {
-        modelViewer.setAttribute('ios-src', iosSrc);
+      if (iosSrc && modelViewer.getAttribute('ios-src') !== absoluteIosSrc) {
+        modelViewer.setAttribute('ios-src', absoluteIosSrc);
         // Wait for iOS to recognize the USDZ file
         await new Promise(resolve => setTimeout(resolve, 500));
       }
       
-      // For iOS Quick Look, we need to ensure the USDZ URL is accessible
-      // Quick Look requires the file to be directly accessible via HTTPS
-      // Try to activate AR programmatically - this will show Quick Look dialog
+      // For iOS, try WebXR first (if supported), then fall back to Quick Look
+      // WebXR will show camera directly, Quick Look requires user interaction
+      addDebugLog('iOS: Attempting to activate AR...', 'info');
+      addDebugLog(`iOS: Using USDZ URL: ${absoluteIosSrc}`, 'info');
+      
+      // Try WebXR first (works in some iOS versions)
       try {
-        addDebugLog('iOS: Attempting to activate AR (Quick Look)...', 'info');
-        addDebugLog(`iOS: Using USDZ URL: ${absoluteIosSrc}`, 'info');
-        
-        // Double-check the URL is absolute and accessible
-        if (!absoluteIosSrc.startsWith('http')) {
-          throw new Error('USDZ URL must be absolute for Quick Look');
-        }
-        
-        // Ensure the model-viewer has the correct ios-src before activating
-        modelViewer.setAttribute('ios-src', absoluteIosSrc);
-        
-        // Small delay to ensure attribute is set
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Now try to activate AR
+        addDebugLog('iOS: Trying WebXR AR mode...', 'info');
         await modelViewer.activateAR();
-        addDebugLog('iOS: AR activation initiated - Quick Look dialog should appear', 'success');
-        // If successful, Quick Look dialog will appear (expected on iOS)
-        // User needs to click "Allow" to proceed to AR view with camera
+        addDebugLog('iOS: AR activation successful', 'success');
+        // If WebXR works, camera should show directly
         return;
-      } catch (error) {
-        const errorMsg = `iOS: AR activation failed: ${error.message}`;
-        addDebugLog(errorMsg, 'error');
-        console.error('iOS AR activation error:', error);
+      } catch (webxrError) {
+        addDebugLog(`iOS: WebXR failed, trying Quick Look: ${webxrError.message}`, 'info');
         
-        // If activation fails, show error to user
-        throw new Error(`Failed to open AR: ${error.message}. Please ensure you're using HTTPS and the USDZ file is accessible.`);
+        // If WebXR fails, Quick Look will be tried automatically by model-viewer
+        // But if that also fails, show the model-viewer with AR button
+        // The user can then manually tap the AR button on the model-viewer
+        addDebugLog('iOS: Showing model-viewer - tap AR button to activate', 'info');
+        setShowARViewer(true);
+        setIsActivating(false);
+        return;
       }
     }
 
@@ -671,6 +662,28 @@ export default function ARPreviewButton({
       {/* For iOS, show it when AR viewer is activated. For others, keep it hidden until AR activates */}
       {showARViewer ? (
         <div className="fixed inset-0 z-[9999] bg-black">
+          {/* Back Button */}
+          <div className="absolute top-4 left-4 z-[10000]">
+            <button
+              type="button"
+              onClick={() => {
+                setShowARViewer(false);
+                setIsActivating(false);
+                if (modelViewerRef.current) {
+                  modelViewerRef.current.style.cssText = 'display: none;';
+                }
+              }}
+              className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 shadow-lg"
+              aria-label="Close AR"
+            >
+              <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-sm font-semibold text-gray-900">Back</span>
+            </button>
+          </div>
+          
+          {/* Close Button (X) */}
           <div className="absolute top-4 right-4 z-[10000]">
             <button
               type="button"
@@ -689,6 +702,16 @@ export default function ARPreviewButton({
               </svg>
             </button>
           </div>
+          
+          {/* Info message for iOS - Instructions to tap AR button */}
+          {isIOS && (
+            <div className="absolute bottom-20 left-4 right-4 z-[10000] bg-blue-500/90 text-white p-4 rounded-lg shadow-xl">
+              <p className="font-semibold mb-2 text-base">📱 Tap the AR button to view in Augmented Reality</p>
+              <p className="text-sm opacity-90 mb-2">Look for the cube/AR icon on the 3D model viewer below</p>
+              <p className="text-xs opacity-75">If Quick Look showed "Zero KB", the USDZ file may need to be checked. The AR button will try WebXR instead.</p>
+            </div>
+          )}
+          
           <model-viewer
             ref={modelViewerRef}
             style={{ width: '100vw', height: '100vh', display: 'block' }}
