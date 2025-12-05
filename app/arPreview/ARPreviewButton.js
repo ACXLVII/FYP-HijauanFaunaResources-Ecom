@@ -172,6 +172,12 @@ export default function ARPreviewButton({
       };
       modelViewer.addEventListener('ar-status', arStatusHandler);
       
+      // Quick Look dialog cancellation handler (iOS)
+      modelViewer.addEventListener('error', (e) => {
+        console.log('Model viewer error or cancellation:', e);
+        hideModelViewer();
+      }, { once: true });
+      
       // Fallback: Check periodically if AR is still active
       const checkInterval = setInterval(() => {
         if (modelViewer.canActivateAR && !modelViewer.modelIsVisible) {
@@ -214,6 +220,9 @@ export default function ARPreviewButton({
 
       // Wait a moment for everything to be ready
       await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Make model-viewer visible just before activating AR
+      modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block;';
       
       // Activate AR
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
@@ -365,27 +374,27 @@ export default function ARPreviewButton({
       {/* Model-viewer - only rendered when AR is active */}
       {/* Completely removed from DOM when not in use to prevent blocking */}
       {isClient && renderModelViewer && (
-        <div className="fixed inset-0 z-[9999]" style={{ pointerEvents: 'none' }}>
-          <model-viewer
-            ref={modelViewerRef}
-            src={modelSrc}
-            ios-src={iosSrc}
-            poster={posterSrc}
-            ar
-            ar-modes="scene-viewer quick-look"
-            ar-placement={arPlacement}
-            camera-controls
-            loading="eager"
-            style={{ 
-              width: '100vw',
-              height: '100vh',
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              pointerEvents: 'auto'
-            }}
-          />
-        </div>
+        <model-viewer
+          ref={modelViewerRef}
+          src={modelSrc}
+          ios-src={iosSrc}
+          poster={posterSrc}
+          ar
+          ar-modes="scene-viewer quick-look"
+          ar-placement={arPlacement}
+          camera-controls
+          loading="eager"
+          style={{ 
+            position: 'fixed',
+            top: '-9999px',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            visibility: 'hidden',
+            opacity: 0,
+            pointerEvents: 'none'
+          }}
+        />
       )}
     </>
   );
