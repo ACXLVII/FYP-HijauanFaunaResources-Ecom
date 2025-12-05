@@ -14,46 +14,8 @@ const SectionWelcome = () => {
   const slides = [
     {
       id: 1,
-      background: 'url(/images/home_page/promoBanner.jpg)',
-      content: (
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-2 md:gap-3 h-full px-4 md:px-6 lg:px-8">
-          {/* Left Side - Title */}
-          <div className="relative flex-shrink-0 w-full lg:w-auto">
-            <div className="text-center lg:text-left">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 drop-shadow-2xl">
-                WEBSITE OPENING
-              </h2>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 drop-shadow-2xl">
-                SPECIAL OFFER
-              </h2>
-            </div>
-          </div>
-
-          {/* Right Side - Offer */}
-          <div className="flex-1 w-full lg:w-auto flex flex-col items-center lg:items-end gap-2 md:gap-3">
-            <div className="text-center lg:text-right">
-              <div className="flex flex-col items-center lg:items-end gap-0.5 md:gap-1">
-                <div className="flex flex-col md:flex-row items-center lg:items-end gap-1 md:gap-2">
-                  <span className="text-white text-base md:text-lg lg:text-xl xl:text-2xl font-bold tracking-wide">
-                    BUY ANY GRASS
-                  </span>
-                  <span className="text-yellow-400 text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black leading-none drop-shadow-lg">
-                    FREE
-                  </span>
-                </div>
-                <span className="text-white text-sm md:text-base lg:text-lg xl:text-xl font-semibold tracking-wide">
-                  PLANTS & ACCESSORIES
-                </span>
-              </div>
-            </div>
-            <div className="text-center lg:text-right">
-              <p className="text-white text-xs md:text-sm lg:text-base font-medium">
-                LIMITED TIME OFFER - WHILE STOCKS LAST
-              </p>
-            </div>
-          </div>
-        </div>
-      ),
+      background: 'url(/images/home_page/promoBanner.png)',
+      content: null, // Remove CSS text since it's in the PNG
     },
     {
       id: 2,
@@ -141,16 +103,13 @@ const SectionWelcome = () => {
                   backgroundPosition: 'center',
                   width: '100%',
                   height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#FFFFFF',
-                  textShadow: '0 0 10px rgba(0,0,0,0.7)',
                 }}
               >
-              <div className={`h-[75vh] lg:h-[70vh] w-[75vw] lg:w-[80vw] ${slide.id === 1 ? 'bg-black/10' : 'bg-[#000000]/70'}`}>
-                {slide.content}
-              </div>
+                {slide.content && (
+                  <div className={`h-[75vh] lg:h-[70vh] w-[75vw] lg:w-[80vw] ${slide.id === 1 ? '' : 'bg-[#000000]/70'}`}>
+                    {slide.content}
+                  </div>
+                )}
               </div>
             </SwiperSlide>
           ))}

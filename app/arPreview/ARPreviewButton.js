@@ -22,6 +22,7 @@ export default function ARPreviewButton({
   const [error, setError] = useState(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
 
   // Load model-viewer web component
   useEffect(() => {
@@ -59,8 +60,19 @@ export default function ARPreviewButton({
     if (!isActivating && modelViewerRef.current) {
       console.log('isActivating changed to false, forcing hide');
       modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+      setShowCloseButton(false);
     }
   }, [isActivating]);
+
+  // Manual close function
+  const handleManualClose = useCallback(() => {
+    console.log('Manual close triggered');
+    if (modelViewerRef.current) {
+      modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+    }
+    setIsActivating(false);
+    setShowCloseButton(false);
+  }, []);
 
   // Request camera permission
   const handleClick = useCallback(async () => {
@@ -108,16 +120,31 @@ export default function ARPreviewButton({
           modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
         }
         setIsActivating(false);
+        setShowCloseButton(false);
       };
       
       // Listen for visibility change (when user switches away from AR)
       const visibilityHandler = () => {
-        if (document.visibilityState === 'visible' && isActivating) {
+        if (document.visibilityState === 'visible') {
           console.log('Visibility changed, hiding model');
           setTimeout(hideModelViewer, 500);
         }
       };
       document.addEventListener('visibilitychange', visibilityHandler);
+      
+      // Listen for page focus/blur (additional cleanup trigger)
+      const focusHandler = () => {
+        console.log('Window focused, checking AR state');
+        setTimeout(hideModelViewer, 500);
+      };
+      window.addEventListener('focus', focusHandler);
+      
+      // Also cleanup on page hide
+      const pageHideHandler = () => {
+        console.log('Page hide detected');
+        hideModelViewer();
+      };
+      window.addEventListener('pagehide', pageHideHandler);
       
       // Listen for AR session end
       const arStatusHandler = (event) => {
@@ -125,6 +152,10 @@ export default function ARPreviewButton({
         if (event.detail.status === 'not-presenting' || event.detail.status === 'failed') {
           hideModelViewer();
           document.removeEventListener('visibilitychange', visibilityHandler);
+          window.removeEventListener('focus', focusHandler);
+          window.removeEventListener('pagehide', pageHideHandler);
+          clearInterval(checkInterval);
+          clearTimeout(maxTimeout);
         }
       };
       modelViewer.addEventListener('ar-status', arStatusHandler);
@@ -136,6 +167,9 @@ export default function ARPreviewButton({
           hideModelViewer();
           clearInterval(checkInterval);
           document.removeEventListener('visibilitychange', visibilityHandler);
+          window.removeEventListener('focus', focusHandler);
+          window.removeEventListener('pagehide', pageHideHandler);
+          clearTimeout(maxTimeout);
         }
       }, 1000);
       
@@ -145,6 +179,8 @@ export default function ARPreviewButton({
         hideModelViewer();
         clearInterval(checkInterval);
         document.removeEventListener('visibilitychange', visibilityHandler);
+        window.removeEventListener('focus', focusHandler);
+        window.removeEventListener('pagehide', pageHideHandler);
       }, 300000); // 5 minutes
       
       // Make model-viewer visible for AR activation
@@ -173,11 +209,17 @@ export default function ARPreviewButton({
       // Activate AR
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
-        // AR activated - cleanup handlers are set up above
+        // AR activated - show close button after a delay
+        setTimeout(() => {
+          setShowCloseButton(true);
+        }, 2000);
+        // Cleanup handlers are set up above
       } else {
         clearInterval(checkInterval);
         clearTimeout(maxTimeout);
         document.removeEventListener('visibilitychange', visibilityHandler);
+        window.removeEventListener('focus', focusHandler);
+        window.removeEventListener('pagehide', pageHideHandler);
         throw new Error('AR not available on this device or browser.');
       }
       
@@ -198,6 +240,22 @@ export default function ARPreviewButton({
 
   return (
     <>
+      {/* Close Button Overlay - appears after AR is activated */}
+      {showCloseButton && (
+        <div className="fixed inset-0 z-[10000] flex items-start justify-center pt-4 px-4 pointer-events-none">
+          <button
+            type="button"
+            onClick={handleManualClose}
+            className="pointer-events-auto bg-red-600 text-white px-6 py-3 rounded-full shadow-2xl font-bold text-lg flex items-center gap-2 animate-pulse"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Close AR
+          </button>
+        </div>
+      )}
+
       {error && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4">
           <div className="w-full max-w-xs rounded-lg bg-white p-6 text-center shadow-xl">
@@ -277,10 +335,18 @@ export default function ARPreviewButton({
       <button
         type="button"
         onClick={handleClick}
-        className={className}
+        className={`${className} ${isActivating ? 'opacity-50 cursor-not-allowed' : ''}`}
         disabled={isActivating}
       >
-        {children}
+        {isActivating ? (
+          <div className="flex items-center justify-center gap-2">
+            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>AR Active...</span>
+          </div>
+        ) : children}
       </button>
 
       {/* Hidden model-viewer - will be activated programmatically */}
