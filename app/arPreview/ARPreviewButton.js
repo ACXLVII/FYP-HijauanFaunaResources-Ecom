@@ -20,6 +20,8 @@ export default function ARPreviewButton({
   const [isActivating, setIsActivating] = useState(false);
   const [error, setError] = useState(null);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showARViewer, setShowARViewer] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load model-viewer web component
   useEffect(() => {
@@ -84,17 +86,23 @@ export default function ARPreviewButton({
 
     setShowInstructions(false);
     setIsActivating(true);
+    setIsLoading(true);
 
     try {
       const modelViewer = modelViewerRef.current;
       
-      // Check if WebXR is available (required for camera view)
-      // Note: iOS Safari 15+ supports WebXR, but it might not be available in all contexts
+      // Check WebXR support
       const hasWebXR = 'xr' in navigator;
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
       
-      if (!hasWebXR) {
-        console.warn('WebXR not detected, but will try anyway - model-viewer may fallback to Quick Look');
-        // Don't throw - let model-viewer try, but we've set ar-modes to webxr only
+      if (isIOS && !hasWebXR) {
+        // iOS without WebXR - show model-viewer with AR button instead
+        // User can tap AR button manually (this avoids Quick Look "Zero KB" issue)
+        console.log('iOS detected without WebXR - showing model-viewer with AR button');
+        setShowARViewer(true);
+        setIsActivating(false);
+        setIsLoading(false);
+        return;
       }
       
       // Make model-viewer visible and fullscreen for WebXR
@@ -104,13 +112,20 @@ export default function ARPreviewButton({
       
       // Wait for model to load if needed
       if (!modelViewer.loaded) {
+        console.log('Waiting for model to load...');
         await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error('Model loading timeout')), 10000);
+          const timeout = setTimeout(() => {
+            modelViewer.removeEventListener('load', onLoad);
+            reject(new Error('Model loading timeout - the file may be too large'));
+          }, 15000); // 15 seconds for large models
+          
           const onLoad = () => {
             clearTimeout(timeout);
             modelViewer.removeEventListener('load', onLoad);
+            console.log('Model loaded successfully');
             resolve();
           };
+          
           modelViewer.addEventListener('load', onLoad);
           if (modelViewer.loaded) {
             clearTimeout(timeout);
@@ -124,20 +139,32 @@ export default function ARPreviewButton({
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Force WebXR only - no Quick Look fallback
-      // Set ar-modes to webxr only before activating
       modelViewer.setAttribute('ar-modes', 'webxr');
+      console.log('Attempting to activate WebXR AR...');
       
       // Activate AR - WebXR should open camera directly (like Android)
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
-        // AR activated - camera should show now (WebXR mode only)
+        console.log('AR activated - camera should be visible now');
+        setIsLoading(false);
         // Don't reset isActivating - let AR session continue
       } else {
         throw new Error('AR not available. Please try a different browser or device.');
       }
     } catch (err) {
       console.error('AR activation error:', err);
-      setError(err.message || 'Failed to start AR. WebXR is required. Please use Safari 15+ or Chrome on iOS 15+.');
+      setIsLoading(false);
+      
+      // If WebXR fails on iOS, show model-viewer as fallback
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      if (isIOS && err.message?.includes('webxr') || !('xr' in navigator)) {
+        console.log('WebXR failed on iOS - showing model-viewer with AR button');
+        setShowARViewer(true);
+        setIsActivating(false);
+        return;
+      }
+      
+      setError(err.message || 'Failed to start AR. Please ensure you\'re using a browser that supports WebXR.');
       setIsActivating(false);
       // Restore original style on error
       if (modelViewerRef.current) {
@@ -165,6 +192,74 @@ export default function ARPreviewButton({
               OK
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center bg-black/80 px-4">
+          <div className="w-full max-w-xs rounded-lg bg-white p-6 text-center shadow-xl">
+            <div className="mb-4">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#623183] border-t-transparent"></div>
+            </div>
+            <h2 className="mb-2 text-lg font-semibold text-gray-900">Loading AR...</h2>
+            <p className="text-sm text-gray-600">Preparing 3D model and camera</p>
+          </div>
+        </div>
+      )}
+
+      {/* AR Viewer - shown when WebXR isn't available or as fallback */}
+      {showARViewer && (
+        <div className="fixed inset-0 z-[9999] bg-black">
+          <div className="absolute top-4 left-4 z-[10000]">
+            <button
+              type="button"
+              onClick={() => {
+                setShowARViewer(false);
+                setIsActivating(false);
+                if (modelViewerRef.current) {
+                  modelViewerRef.current.style.cssText = 'display: none;';
+                }
+              }}
+              className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 shadow-lg"
+            >
+              <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-sm font-semibold text-gray-900">Back</span>
+            </button>
+          </div>
+          <div className="absolute top-4 right-4 z-[10000]">
+            <button
+              type="button"
+              onClick={() => {
+                setShowARViewer(false);
+                setIsActivating(false);
+                if (modelViewerRef.current) {
+                  modelViewerRef.current.style.cssText = 'display: none;';
+                }
+              }}
+              className="rounded-full bg-white/90 p-2 shadow-lg"
+            >
+              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="absolute bottom-20 left-4 right-4 z-[10000] bg-blue-500/90 text-white p-4 rounded-lg shadow-xl">
+            <p className="font-semibold mb-1 text-base">📱 Tap the AR button (cube icon) on the model</p>
+            <p className="text-sm opacity-90">This will open AR with your camera directly</p>
+          </div>
+          <model-viewer
+            ref={modelViewerRef}
+            src={modelSrc}
+            poster={posterSrc}
+            ar
+            ar-modes="webxr"
+            ar-placement={arPlacement}
+            camera-controls
+            style={{ width: '100vw', height: '100vh', display: 'block' }}
+          />
         </div>
       )}
 
