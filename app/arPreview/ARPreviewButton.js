@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Simple AR Preview Button for mobile devices
- * Uses model-viewer with WebXR (primary) and Quick Look (iOS fallback)
+ * Uses model-viewer with WebXR only - opens camera directly (works on iOS and Android)
  */
 export default function ARPreviewButton({
   children,
@@ -74,7 +74,7 @@ export default function ARPreviewButton({
     }
   }, [isClient, isMobile, isActivating]);
 
-  // Start AR after instructions
+  // Start AR after instructions - WebXR only (like Android)
   const handleStartAR = useCallback(async () => {
     if (!modelViewerRef.current) {
       setError('AR not available. Please refresh the page and try again.');
@@ -87,6 +87,15 @@ export default function ARPreviewButton({
 
     try {
       const modelViewer = modelViewerRef.current;
+      
+      // Check if WebXR is available (required for camera view)
+      // Note: iOS Safari 15+ supports WebXR, but it might not be available in all contexts
+      const hasWebXR = 'xr' in navigator;
+      
+      if (!hasWebXR) {
+        console.warn('WebXR not detected, but will try anyway - model-viewer may fallback to Quick Look');
+        // Don't throw - let model-viewer try, but we've set ar-modes to webxr only
+      }
       
       // Make model-viewer visible and fullscreen for WebXR
       // WebXR requires the element to be in the viewport
@@ -114,17 +123,21 @@ export default function ARPreviewButton({
       // Wait a moment for everything to be ready
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      // Force WebXR only - no Quick Look fallback
+      // Set ar-modes to webxr only before activating
+      modelViewer.setAttribute('ar-modes', 'webxr');
+      
       // Activate AR - WebXR should open camera directly (like Android)
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
-        // AR activated - camera should show now (WebXR mode)
+        // AR activated - camera should show now (WebXR mode only)
         // Don't reset isActivating - let AR session continue
       } else {
         throw new Error('AR not available. Please try a different browser or device.');
       }
     } catch (err) {
       console.error('AR activation error:', err);
-      setError(err.message || 'Failed to start AR. Please ensure you\'re using a browser that supports WebXR (Safari 15+ or Chrome).');
+      setError(err.message || 'Failed to start AR. WebXR is required. Please use Safari 15+ or Chrome on iOS 15+.');
       setIsActivating(false);
       // Restore original style on error
       if (modelViewerRef.current) {
@@ -206,13 +219,14 @@ export default function ARPreviewButton({
       </button>
 
       {/* Hidden model-viewer - will be activated programmatically */}
+      {/* WebXR only - no Quick Look to ensure camera opens directly */}
       {isClient && (
         <model-viewer
           ref={modelViewerRef}
           src={modelSrc}
           poster={posterSrc}
           ar
-          ar-modes="webxr scene-viewer"
+          ar-modes="webxr"
           ar-placement={arPlacement}
           camera-controls
           style={{ display: 'none', width: '100vw', height: '100vh' }}
