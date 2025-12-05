@@ -77,7 +77,13 @@ const SectionWelcome = () => {
 
   return (
     <section className="relative">
-      <div className="h-[60vh] lg:h-[70vh]">
+      <div 
+        className="w-full"
+        style={{
+          aspectRatio: '16 / 9', // 1920:1080 ratio
+          minHeight: '300px', // Fallback for older browsers
+        }}
+      >
         <Swiper
           modules={[EffectFade, Navigation, Pagination, Autoplay]}
           spaceBetween={0}
@@ -106,7 +112,7 @@ const SectionWelcome = () => {
                 }}
               >
                 {slide.content && (
-                  <div className={`h-[75vh] lg:h-[70vh] w-[75vw] lg:w-[80vw] ${slide.id === 1 ? '' : 'bg-[#000000]/70'}`}>
+                  <div className={`w-full max-w-7xl mx-auto px-4 lg:px-8 ${slide.id === 1 ? '' : 'bg-[#000000]/70'}`}>
                     {slide.content}
                   </div>
                 )}
