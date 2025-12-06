@@ -14,7 +14,7 @@ const SectionWelcome = () => {
   const slides = [
     {
       id: 1,
-      background: 'url(/images/home_page/promoBanner.png)',
+      background: 'url(/images/home_page/welcome/promoBanner.png)',
       content: null, // Remove CSS text since it's in the PNG
     },
     {
@@ -80,7 +80,7 @@ const SectionWelcome = () => {
       <div 
         className="w-full"
         style={{
-          aspectRatio: '851 / 315', // Match new promoBanner.png dimensions (2.7:1 ratio)
+          aspectRatio: '1920 / 710', // Match promoBanner.png high-res dimensions
           minHeight: '300px', // Fallback for older browsers
         }}
       >
