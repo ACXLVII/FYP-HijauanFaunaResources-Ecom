@@ -23,16 +23,25 @@ export default function ARPreviewButton({
     if (typeof window === 'undefined') return;
     
     setIsClient(true);
-    setIsIOS(/iPhone|iPad|iPod/i.test(navigator.userAgent));
+    
+    // Better iOS/iPad detection (iPadOS 13+ identifies as Mac)
+    const isAppleDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOS(isAppleDevice);
     
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 1024 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+      const isMobileDevice = window.innerWidth <= 1024 || 
+                             /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+                             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      setIsMobile(isMobileDevice);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
     // Load model-viewer only for Android
-    if (!/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    const isAppleCheck = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!isAppleCheck) {
       const script = document.createElement('script');
       script.type = 'module';
       script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
@@ -52,17 +61,37 @@ export default function ARPreviewButton({
   const handleStartAR = () => {
     setShowInstructions(false);
 
-    console.log('AR Click - iOS:', isIOS, 'iosSrc:', iosSrc);
+    console.log('AR Start - iOS:', isIOS, 'iosSrc:', iosSrc);
+    console.log('User Agent:', navigator.userAgent);
+    console.log('Platform:', navigator.platform);
+    console.log('Touch Points:', navigator.maxTouchPoints);
 
     // iOS: Use direct anchor link to USDZ
     if (isIOS && iosSrc) {
       console.log('iOS path: Creating direct Quick Look link');
+      
+      // Create and trigger Quick Look link
       const anchor = document.createElement('a');
       anchor.rel = 'ar';
       anchor.href = iosSrc;
+      
+      // Try multiple methods to ensure it works
       document.body.appendChild(anchor);
+      
+      // Method 1: Direct click
       anchor.click();
-      setTimeout(() => document.body.removeChild(anchor), 100);
+      
+      // Method 2: Dispatch event (fallback)
+      setTimeout(() => {
+        const clickEvent = new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true
+        });
+        anchor.dispatchEvent(clickEvent);
+      }, 50);
+      
+      setTimeout(() => document.body.removeChild(anchor), 500);
       return;
     }
 
