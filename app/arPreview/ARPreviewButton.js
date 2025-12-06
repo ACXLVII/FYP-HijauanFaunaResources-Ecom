@@ -121,17 +121,34 @@ export default function ARPreviewButton({
   // Start AR after instructions
   const handleStartAR = useCallback(async () => {
     setShowInstructions(false);
-    
-    // Show a brief "Preparing AR..." message
     setIsActivating(true);
     
-    // Small delay before mounting to prevent auto-trigger
+    // iOS: Use direct link to USDZ (bypasses model-viewer visibility issues)
+    if (isIOS && iosSrc) {
+      console.log('iOS detected - using direct Quick Look link');
+      
+      // Create a temporary anchor element and click it
+      const anchor = document.createElement('a');
+      anchor.rel = 'ar';
+      anchor.href = iosSrcWithCache;
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      
+      // Trigger Quick Look
+      anchor.click();
+      
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(anchor);
+        setIsActivating(false);
+      }, 1000);
+      
+      return;
+    }
+    
+    // Android: Use model-viewer
     await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Mount model-viewer
     setRenderModelViewer(true);
-    
-    // Wait for model-viewer to mount and be ready
     await new Promise(resolve => setTimeout(resolve, 800));
     
     if (!modelViewerRef.current) {
@@ -300,7 +317,7 @@ export default function ARPreviewButton({
         setRenderModelViewer(false);
       }, 200);
     }
-  }, []);
+  }, [isIOS, iosSrcWithCache]);
 
   if (!isClient || !isMobile) {
     return null;

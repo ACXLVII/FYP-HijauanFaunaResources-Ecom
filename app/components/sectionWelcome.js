@@ -80,7 +80,7 @@ const SectionWelcome = () => {
       <div 
         className="w-full"
         style={{
-          aspectRatio: '16 / 9', // 1920:1080 ratio
+          aspectRatio: '851 / 315', // Match new promoBanner.png dimensions (2.7:1 ratio)
           minHeight: '300px', // Fallback for older browsers
         }}
       >
