@@ -251,13 +251,10 @@ export default function ARPreviewButton({
       // Wait a moment for everything to be ready
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Make model-viewer visible just before activating AR
-      modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block;';
-      
-      // Small delay to ensure visibility
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
       // Activate AR
+      // Note: On iOS, Quick Look works from hidden model-viewer
+      // On Android, Scene Viewer also works from hidden element
+      // We don't need to make model-viewer visible!
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         try {
           await modelViewer.activateAR();
