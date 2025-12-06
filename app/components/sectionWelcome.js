@@ -14,7 +14,7 @@ const SectionWelcome = () => {
   const slides = [
     {
       id: 1,
-      background: 'url(/images/home_page/welcome/promoBanner.png)',
+      background: 'url(/images/home_page/welcome/promoBanner.png?v=2)',
       content: null, // Remove CSS text since it's in the PNG
     },
     {

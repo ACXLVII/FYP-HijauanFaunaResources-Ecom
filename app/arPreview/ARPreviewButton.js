@@ -44,8 +44,11 @@ export default function ARPreviewButton({
   const handleClick = () => {
     if (!isClient || !isMobile) return;
 
+    console.log('AR Click - iOS:', isIOS, 'iosSrc:', iosSrc);
+
     // iOS: Use direct anchor link to USDZ
     if (isIOS && iosSrc) {
+      console.log('iOS path: Creating direct Quick Look link');
       const anchor = document.createElement('a');
       anchor.rel = 'ar';
       anchor.href = iosSrc;
@@ -55,9 +58,13 @@ export default function ARPreviewButton({
       return;
     }
 
+    console.log('Android path: Creating model-viewer');
     // Android: Use model-viewer (will be added dynamically)
     const existingViewer = document.querySelector('#temp-ar-viewer');
-    if (existingViewer) existingViewer.remove();
+    if (existingViewer) {
+      console.log('Removing existing viewer');
+      existingViewer.remove();
+    }
 
     const viewer = document.createElement('model-viewer');
     viewer.id = 'temp-ar-viewer';
