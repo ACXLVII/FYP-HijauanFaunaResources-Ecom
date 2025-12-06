@@ -1,471 +1,120 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 /**
- * AR Preview Button for mobile devices
- * - Android: Uses Scene Viewer (direct camera access)
- * - iOS: Uses Quick Look (shows "Open 3D model" dialog - this is unavoidable on iOS)
+ * Simple AR Preview Button - Clean Rebuild
+ * iOS: Direct Quick Look link (no model-viewer needed)
+ * Android: model-viewer with Scene Viewer
  */
 export default function ARPreviewButton({
   children,
   modelSrc,
   iosSrc,
-  posterSrc,
   arPlacement = 'floor',
   className = '',
 }) {
-  const modelViewerRef = useRef(null);
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isActivating, setIsActivating] = useState(false);
-  const [error, setError] = useState(null);
-  const [showInstructions, setShowInstructions] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [showCloseButton, setShowCloseButton] = useState(false);
-  const [renderModelViewer, setRenderModelViewer] = useState(false);
-  
-  // Cache busting for model files
-  const cacheBuster = Date.now();
-  const modelSrcWithCache = `${modelSrc}?v=${cacheBuster}`;
-  const iosSrcWithCache = iosSrc ? `${iosSrc}?v=${cacheBuster}` : undefined;
 
-  // Load model-viewer web component
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     setIsClient(true);
-    
-    // Detect iOS
     setIsIOS(/iPhone|iPad|iPod/i.test(navigator.userAgent));
     
-    // Check if mobile
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 1024 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Load model-viewer
-    const loadModelViewer = async () => {
-      if (window.customElements?.get('model-viewer')) return;
-      try {
-        await import('@google/model-viewer');
-        await window.customElements.whenDefined('model-viewer');
-      } catch (err) {
-        console.error('Failed to load model-viewer:', err);
-      }
-    };
-    loadModelViewer();
+    // Load model-viewer only for Android
+    if (!/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
+      document.head.appendChild(script);
+    }
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Remove model-viewer from DOM when not activating
-  useEffect(() => {
-    if (!isActivating) {
-      console.log('isActivating changed to false, removing model-viewer');
-      setShowCloseButton(false);
-      setTimeout(() => {
-        setRenderModelViewer(false);
-      }, 100);
-    }
-  }, [isActivating]);
+  const handleClick = () => {
+    if (!isClient || !isMobile) return;
 
-  // Manual close function
-  const handleManualClose = useCallback(() => {
-    console.log('Manual close triggered - full cleanup');
-    
-    // Hide model-viewer immediately
-    if (modelViewerRef.current) {
-      modelViewerRef.current.style.cssText = 'display: none !important; position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; visibility: hidden; opacity: 0; pointer-events: none;';
-    }
-    
-    // Reset all states
-    setIsActivating(false);
-    setShowCloseButton(false);
-    setShowInstructions(false);
-    setError(null);
-    
-    // Remove from DOM after cleanup
-    setTimeout(() => {
-      setRenderModelViewer(false);
-    }, 200);
-  }, []);
-
-  // Request camera permission
-  const handleClick = useCallback(async () => {
-    if (!isClient || !isMobile || isActivating) return;
-
-    setIsActivating(true);
-    setError(null);
-
-    try {
-      // Request camera permission first
-      if (navigator.mediaDevices?.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        // Stop the stream immediately - we just needed permission
-        stream.getTracks().forEach(track => track.stop());
-      }
-      
-      // Show instructions
-      setShowInstructions(true);
-      setIsActivating(false);
-    } catch (err) {
-      console.error('Camera permission error:', err);
-      setError('Camera permission is required for AR. Please allow camera access and try again.');
-      setIsActivating(false);
-    }
-  }, [isClient, isMobile, isActivating]);
-
-  // Start AR after instructions
-  const handleStartAR = useCallback(async () => {
-    setShowInstructions(false);
-    setIsActivating(true);
-    
-    // iOS: Use direct link to USDZ (bypasses model-viewer visibility issues)
+    // iOS: Use direct anchor link to USDZ
     if (isIOS && iosSrc) {
-      console.log('iOS detected - using direct Quick Look link');
-      
-      // Create a temporary anchor element and click it
       const anchor = document.createElement('a');
       anchor.rel = 'ar';
-      anchor.href = iosSrcWithCache;
-      anchor.style.display = 'none';
+      anchor.href = iosSrc;
       document.body.appendChild(anchor);
-      
-      // Trigger Quick Look
       anchor.click();
-      
-      // Cleanup
-      setTimeout(() => {
-        document.body.removeChild(anchor);
-        setIsActivating(false);
-      }, 1000);
-      
-      return;
-    }
-    
-    // Android: Use model-viewer
-    await new Promise(resolve => setTimeout(resolve, 300));
-    setRenderModelViewer(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (!modelViewerRef.current) {
-      setError('AR not available. Please refresh the page and try again.');
-      setIsActivating(false);
-      setRenderModelViewer(false);
+      setTimeout(() => document.body.removeChild(anchor), 100);
       return;
     }
 
-    const modelViewer = modelViewerRef.current;
+    // Android: Use model-viewer (will be added dynamically)
+    const existingViewer = document.querySelector('#temp-ar-viewer');
+    if (existingViewer) existingViewer.remove();
 
-    try {
-      // Hide model-viewer function
-      const hideModelViewer = () => {
-        console.log('Hiding and removing model-viewer from DOM');
-        
-        // Force hide immediately
-        if (modelViewerRef.current) {
-          modelViewerRef.current.style.cssText = 'display: none !important; position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; visibility: hidden; opacity: 0; pointer-events: none;';
-        }
-        
-        // Reset all states
-        setIsActivating(false);
-        setShowCloseButton(false);
-        setShowInstructions(false);
-        setError(null);
-        
-        // Remove from DOM completely
-        setTimeout(() => {
-          setRenderModelViewer(false);
-        }, 200);
-      };
-      
-      // Listen for visibility change (when user switches away from AR)
-      const visibilityHandler = () => {
-        if (document.visibilityState === 'visible') {
-          console.log('Visibility changed, hiding model');
-          setTimeout(hideModelViewer, 500);
-        }
-      };
-      document.addEventListener('visibilitychange', visibilityHandler);
-      
-      // Listen for page focus/blur (additional cleanup trigger)
-      const focusHandler = () => {
-        console.log('Window focused, checking AR state');
-        setTimeout(hideModelViewer, 500);
-      };
-      window.addEventListener('focus', focusHandler);
-      
-      // Also cleanup on page hide
-      const pageHideHandler = () => {
-        console.log('Page hide detected');
-        hideModelViewer();
-      };
-      window.addEventListener('pagehide', pageHideHandler);
-      
-      // Listen for AR session end
-      const arStatusHandler = (event) => {
-        console.log('AR status:', event.detail.status);
-        if (event.detail.status === 'not-presenting' || event.detail.status === 'failed') {
-          hideModelViewer();
-          document.removeEventListener('visibilitychange', visibilityHandler);
-          window.removeEventListener('focus', focusHandler);
-          window.removeEventListener('pagehide', pageHideHandler);
-          clearInterval(checkInterval);
-          clearTimeout(maxTimeout);
-        }
-      };
-      modelViewer.addEventListener('ar-status', arStatusHandler);
-      
-      // Quick Look dialog cancellation handler (iOS)
-      modelViewer.addEventListener('error', (e) => {
-        console.log('Model viewer error or cancellation:', e);
-        hideModelViewer();
-      }, { once: true });
-      
-      // Fallback: Check periodically if AR is still active
-      const checkInterval = setInterval(() => {
-        if (modelViewer.canActivateAR && !modelViewer.modelIsVisible) {
-          console.log('AR inactive detected via polling');
-          hideModelViewer();
-          clearInterval(checkInterval);
-          document.removeEventListener('visibilitychange', visibilityHandler);
-          window.removeEventListener('focus', focusHandler);
-          window.removeEventListener('pagehide', pageHideHandler);
-          clearTimeout(maxTimeout);
-        }
-      }, 1000);
-      
-      // Cleanup after 5 minutes max
-      const maxTimeout = setTimeout(() => {
-        console.log('Max timeout reached, forcing cleanup');
-        hideModelViewer();
-        clearInterval(checkInterval);
-        document.removeEventListener('visibilitychange', visibilityHandler);
-        window.removeEventListener('focus', focusHandler);
-        window.removeEventListener('pagehide', pageHideHandler);
-      }, 300000); // 5 minutes
-      
-      // Wait for model to load if needed
-      if (!modelViewer.loaded) {
-        await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error('Model loading timeout. Please check your connection.')), 15000);
-          const onLoad = () => {
-            clearTimeout(timeout);
-            modelViewer.removeEventListener('load', onLoad);
-            resolve();
-          };
-          modelViewer.addEventListener('load', onLoad);
-          if (modelViewer.loaded) {
-            clearTimeout(timeout);
-            resolve();
-          }
+    const viewer = document.createElement('model-viewer');
+    viewer.id = 'temp-ar-viewer';
+    viewer.setAttribute('src', modelSrc);
+    viewer.setAttribute('ar', '');
+    viewer.setAttribute('ar-modes', 'scene-viewer');
+    viewer.setAttribute('ar-placement', arPlacement);
+    viewer.style.cssText = 'position: fixed; width: 1px; height: 1px; top: -9999px; left: -9999px; opacity: 0; pointer-events: none;';
+    
+    document.body.appendChild(viewer);
+
+    // Wait for model-viewer to load, then activate AR
+    setTimeout(() => {
+      if (viewer.activateAR) {
+        viewer.activateAR().catch(() => {
+          viewer.remove();
         });
       }
-
-      // Wait a moment for everything to be ready
-      await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Activate AR
-      // Note: On iOS, Quick Look works from hidden model-viewer
-      // On Android, Scene Viewer also works from hidden element
-      // We don't need to make model-viewer visible!
-      if (modelViewer && typeof modelViewer.activateAR === 'function') {
-        try {
-          await modelViewer.activateAR();
-          // AR activated - show close button immediately
-          setShowCloseButton(true);
-          // Cleanup handlers are set up above
-        } catch (activateError) {
-          // User clicked "Cancel" on iOS Quick Look dialog
-          console.log('AR activation rejected (user cancelled):', activateError);
-          hideModelViewer();
-          clearInterval(checkInterval);
-          clearTimeout(maxTimeout);
-          document.removeEventListener('visibilitychange', visibilityHandler);
-          window.removeEventListener('focus', focusHandler);
-          window.removeEventListener('pagehide', pageHideHandler);
-          return; // Don't throw error, just cleanup
-        }
-      } else {
-        clearInterval(checkInterval);
-        clearTimeout(maxTimeout);
-        document.removeEventListener('visibilitychange', visibilityHandler);
-        window.removeEventListener('focus', focusHandler);
-        window.removeEventListener('pagehide', pageHideHandler);
-        throw new Error('AR not available on this device or browser.');
-      }
+      // Cleanup after AR session ends
+      const cleanup = () => {
+        setTimeout(() => viewer.remove(), 1000);
+      };
       
-    } catch (err) {
-      console.error('AR activation error:', err);
+      viewer.addEventListener('ar-status', (event) => {
+        if (event.detail.status === 'not-presenting') cleanup();
+      });
       
-      // Force hide model-viewer immediately
-      if (modelViewerRef.current) {
-        modelViewerRef.current.style.cssText = 'display: none !important; position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; visibility: hidden; opacity: 0; pointer-events: none;';
-      }
-      
-      // Reset all states
-      setError(err.message || 'Failed to start AR. Please try again or use a different device.');
-      setIsActivating(false);
-      setShowCloseButton(false);
-      setShowInstructions(false);
-      
-      // Remove model-viewer from DOM
-      setTimeout(() => {
-        setRenderModelViewer(false);
-      }, 200);
-    }
-  }, [isIOS, iosSrcWithCache]);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) cleanup();
+      }, { once: true });
+    }, 1000);
+  };
 
   if (!isClient || !isMobile) {
     return null;
   }
 
   return (
-    <>
-      {/* Fullscreen Overlay - blocks website interaction during AR */}
-      {isActivating && (
-        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" />
-      )}
-
-      {/* Close Button Overlay - appears after AR is activated */}
-      {showCloseButton && (
-        <div className="fixed inset-0 z-[10000] flex items-start justify-center pt-4 px-4 pointer-events-none">
-          <button
-            type="button"
-            onClick={handleManualClose}
-            className="pointer-events-auto bg-red-600 text-white px-6 py-3 rounded-full shadow-2xl font-bold text-lg flex items-center gap-2 animate-pulse"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Close AR
-          </button>
-        </div>
-      )}
-
-      {error && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-xs rounded-lg bg-white p-6 text-center shadow-xl">
-            <h2 className="mb-2 text-lg font-semibold text-gray-900">AR Error</h2>
-            <p className="mb-4 text-sm text-gray-700">{error}</p>
-            <button
-              type="button"
-              className="w-full rounded-md bg-[#623183] px-4 py-2 text-sm font-semibold text-white"
-              onClick={() => setError(null)}
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showInstructions && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">AR Preview Instructions</h2>
-            <div className="mb-6 space-y-2 text-left text-sm text-gray-700">
-              {isIOS ? (
-                <>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">1</span>
-                    <span>Tap <strong>"Open this 3D model"</strong> when the dialog appears.</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">2</span>
-                    <span>Point your camera at a flat surface (floor or table).</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">3</span>
-                    <span><strong>Tap on the surface</strong> to place the grass model.</span>
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">1</span>
-                    <span>Point your camera at a flat surface (floor or table).</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">2</span>
-                    <span>Wait for surface detection (you'll see tracking indicators).</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#623183] text-xs font-semibold text-white">3</span>
-                    <span><strong>Tap on the surface</strong> to place the grass model.</span>
-                  </p>
-                </>
-              )}
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 shadow hover:bg-gray-50"
-                onClick={() => {
-                  setShowInstructions(false);
-                  setIsActivating(false);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="flex-1 rounded-md bg-[#623183] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#4e2667]"
-                onClick={handleStartAR}
-              >
-                Start AR
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <button
-        type="button"
-        onClick={handleClick}
-        className={`${className} ${isActivating ? 'opacity-50 cursor-not-allowed' : ''}`}
-        disabled={isActivating}
+    <button
+      onClick={handleClick}
+      className={`flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 ${className}`}
+    >
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
       >
-        {isActivating ? (
-          <div className="flex items-center justify-center gap-2">
-            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>AR Active...</span>
-          </div>
-        ) : children}
-      </button>
-
-      {/* Model-viewer - only rendered when AR is active */}
-      {/* Completely removed from DOM when not in use to prevent blocking */}
-      {isClient && renderModelViewer && (
-        <model-viewer
-          ref={modelViewerRef}
-          src={modelSrcWithCache}
-          ios-src={iosSrcWithCache}
-          poster={posterSrc}
-          ar
-          ar-modes="scene-viewer quick-look"
-          ar-placement={arPlacement}
-          camera-controls
-          loading="eager"
-          reveal="interaction"
-          style={{ 
-            position: 'fixed',
-            top: '-9999px',
-            left: '-9999px',
-            width: '1px',
-            height: '1px',
-            visibility: 'hidden',
-            opacity: 0,
-            pointerEvents: 'none',
-            zIndex: -1
-          }}
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
         />
-      )}
-    </>
+      </svg>
+      {children}
+    </button>
   );
 }
