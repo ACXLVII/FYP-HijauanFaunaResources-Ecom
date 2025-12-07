@@ -174,3 +174,4 @@ You'll see these messages in browser console:
 
 Ready to test! The manual close button should solve the cleanup issue completely. 🚀
 
+
