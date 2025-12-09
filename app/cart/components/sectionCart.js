@@ -68,7 +68,7 @@ export default function SectionCart() {
                     {/* Product Image */}
                     <div className="overflow-hidden relative aspect-square mr-2 lg:mr-4 rounded-md lg:rounded-lg border-2 border-[#C39533]">
                       <Image
-                        src={product.image}
+                        src={typeof product.image === 'string' ? product.image : (product.image?.src || product.image?.default?.src || '/images/HFRlogo.png')}
                         alt={product.name}
                         className="absolute inset-0 object-cover w-full h-full"
                         width={100}

@@ -27,11 +27,19 @@ export function CartProvider({ children }) {
         if (storedCart) {
           const parsedCart = JSON.parse(storedCart);
           
-          // Ensure all items have cartId for compatibility
-          const cartWithIds = parsedCart.map((item, index) => ({
-            ...item,
-            cartId: item.cartId || `${Date.now()}-${index}-${Math.random()}`
-          }));
+          // Ensure all items have cartId and proper image strings
+          const cartWithIds = parsedCart.map((item, index) => {
+            // Ensure image is a string, not an object
+            const image = typeof item.image === 'string' 
+              ? item.image 
+              : item.image?.src || item.image?.default?.src || '';
+            
+            return {
+              ...item,
+              image, // Use the processed image string
+              cartId: item.cartId || `${Date.now()}-${index}-${Math.random()}`
+            };
+          });
           
           setCart(cartWithIds);
         } else {
@@ -80,8 +88,14 @@ export function CartProvider({ children }) {
 
   // Add item to cart
   const addToCart = (newItem) => {
+    // Ensure image is a string, not an object
+    const image = typeof newItem.image === 'string' 
+      ? newItem.image 
+      : newItem.image?.src || newItem.image?.default?.src || '';
+    
     const itemWithId = {
       ...newItem,
+      image, // Use the processed image string
       cartId: `${Date.now()}-${Math.random()}`, // Unique identifier for each cart item
     };
     setCart((prevCart) => [...prevCart, itemWithId]);
