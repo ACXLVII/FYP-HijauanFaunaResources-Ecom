@@ -130,20 +130,21 @@ export default function SectionGrades() {
                 </p>
                 
                 {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
-                  <ARPreviewButton
-                    className="p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/25mm.glb"
-                    iosSrc="/models/artificial_grass/25mm.usdz"
-                    posterSrc="/images/artificial_grass/grades/economy/image1.jpg"
+                <div className="grid grid-cols-1 gap-4 lg:gap-8">
+                  {/* AR temporarily disabled - models need optimization */}
+                  {/* <ARPreviewButton ... /> */}
+                  <button
+                    className="p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    onClick={() => window.location.href = '/shop/artificial_grass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
-                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <TbGardenCart className="text-xl lg:text-2xl text-[#FFFFFF]" />
                       <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                        AR Preview
+                        View in Store
                       </h1>
                     </div>
-                  </ARPreviewButton>
+                  </button>
+                </div>
                   <button
                     className="p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}

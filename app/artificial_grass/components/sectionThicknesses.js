@@ -125,19 +125,21 @@ export default function SectionThickness() {
                  </p>
                 
                {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
-                  <ARPreviewMultiPlacement
-                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/15mm.glb"
-                    iosSrc="/models/artificial_grass/15mm.usdz"
+               <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  {/* AR temporarily disabled - models need optimization */}
+                  {/* <ARPreviewMultiPlacement ... /> */}
+                  <button
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    onClick={() => window.location.href = '/shop/artificial_grass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
-                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <TbGardenCart className="text-xl lg:text-2xl text-[#FFFFFF]" />
                       <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                        AR Preview
+                        View in Store
                       </h1>
                     </div>
-                  </ARPreviewMultiPlacement>
+                  </button>
+                </div>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -185,19 +187,21 @@ export default function SectionThickness() {
                  </p>
                 
                {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
-                  <ARPreviewMultiPlacement
-                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/25mm.glb"
-                    iosSrc="/models/artificial_grass/25mm.usdz"
+               <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  {/* AR temporarily disabled - models need optimization */}
+                  {/* <ARPreviewMultiPlacement ... /> */}
+                  <button
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    onClick={() => window.location.href = '/shop/artificial_grass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
-                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <TbGardenCart className="text-xl lg:text-2xl text-[#FFFFFF]" />
                       <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                        AR Preview
+                        View in Store
                       </h1>
                     </div>
-                  </ARPreviewMultiPlacement>
+                  </button>
+                </div>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -245,19 +249,21 @@ export default function SectionThickness() {
                  </p>
                 
                {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
-                  <ARPreviewMultiPlacement
-                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/30mm.glb"
-                    iosSrc="/models/artificial_grass/30mm.usdz"
+               <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  {/* AR temporarily disabled - models need optimization */}
+                  {/* <ARPreviewMultiPlacement ... /> */}
+                  <button
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    onClick={() => window.location.href = '/shop/artificial_grass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
-                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <TbGardenCart className="text-xl lg:text-2xl text-[#FFFFFF]" />
                       <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                        AR Preview
+                        View in Store
                       </h1>
                     </div>
-                  </ARPreviewMultiPlacement>
+                  </button>
+                </div>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -305,19 +311,21 @@ export default function SectionThickness() {
                  </p>
                 
                {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
-                  <ARPreviewMultiPlacement
-                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/35mm.glb"
-                    iosSrc="/models/artificial_grass/35mm.usdz"
+               <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  {/* AR temporarily disabled - models need optimization */}
+                  {/* <ARPreviewMultiPlacement ... /> */}
+                  <button
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    onClick={() => window.location.href = '/shop/artificial_grass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
-                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <TbGardenCart className="text-xl lg:text-2xl text-[#FFFFFF]" />
                       <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                        AR Preview
+                        View in Store
                       </h1>
                     </div>
-                  </ARPreviewMultiPlacement>
+                  </button>
+                </div>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -365,19 +373,21 @@ export default function SectionThickness() {
                  </p>
                 
                {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
-                  <ARPreviewMultiPlacement
-                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                    modelSrc="/models/artificial_grass/40mm.glb"
-                    iosSrc="/models/artificial_grass/40mm.usdz"
+               <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  {/* AR temporarily disabled - models need optimization */}
+                  {/* <ARPreviewMultiPlacement ... /> */}
+                  <button
+                    className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
+                    onClick={() => window.location.href = '/shop/artificial_grass'}
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
-                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <TbGardenCart className="text-xl lg:text-2xl text-[#FFFFFF]" />
                       <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                        AR Preview
+                        View in Store
                       </h1>
                     </div>
-                  </ARPreviewMultiPlacement>
+                  </button>
+                </div>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}

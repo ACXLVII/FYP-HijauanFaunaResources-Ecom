@@ -9,14 +9,22 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Set mounted state
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Load cart from localStorage on mount
   useEffect(() => {
+    if (!isMounted) return;
+
     const loadCartFromStorage = () => {
-      const storedCart = localStorage.getItem('cart');
-      
-      if (storedCart) {
-        try {
+      try {
+        const storedCart = localStorage.getItem('cart');
+        
+        if (storedCart) {
           const parsedCart = JSON.parse(storedCart);
           
           // Ensure all items have cartId for compatibility
@@ -26,12 +34,16 @@ export function CartProvider({ children }) {
           }));
           
           setCart(cartWithIds);
-        } catch (error) {
-          console.error('Error parsing cart from localStorage:', error);
-          localStorage.removeItem('cart');
+        } else {
           setCart([]);
         }
-      } else {
+      } catch (error) {
+        console.error('Error parsing cart from localStorage:', error);
+        try {
+          localStorage.removeItem('cart');
+        } catch (e) {
+          console.error('Error removing cart from localStorage:', e);
+        }
         setCart([]);
       }
     };
@@ -53,7 +65,7 @@ export function CartProvider({ children }) {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [isMounted]);
 
   // Save cart to localStorage whenever it changes (but not on initial load)
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import { useCart } from '@/app/hooks/useCart';
@@ -11,11 +11,38 @@ import { RxCross2 } from "react-icons/rx";
 
 export default function SectionCart() {
   const { cart, removeFromCart, getTotalPrice } = useCart();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const shipping = 15.00;
   const taxRate = 0.08;
-  const totalPrice = useMemo(() => getTotalPrice(), [cart]);
+  const totalPrice = useMemo(() => getTotalPrice(), [cart, getTotalPrice]);
   const tax = totalPrice * taxRate;
   const orderTotal = totalPrice + shipping + tax;
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!isMounted) {
+    return (
+      <div className="bg-[#000000]/50">
+        <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-8 lg:py-16">
+          <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-8">
+            <div className="lg:col-span-8 mb-4 lg:mb-0 p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
+              <div className="flex items-center justify-center h-32">
+                <p className="text-lg text-[#4A5565]">Loading...</p>
+              </div>
+            </div>
+            <div className="lg:col-span-4 p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
+              <h2 className="mb-2 lg:mb-4 font-bold tracking-tight text-lg lg:text-xl text-[#101828]">
+                Cart Summary
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#000000]/50">

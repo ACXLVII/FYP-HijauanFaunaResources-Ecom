@@ -282,7 +282,18 @@ export default function Header() {
 
   // [CART STATES AND FUNCTIONS]
   const { getCartCount } = useCart();
-  const cartCount = getCartCount();
+  const [cartCount, setCartCount] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      setCartCount(getCartCount());
+    }
+  }, [isMounted, getCartCount]);
 
   const isServicesActive = servicesPaths.some(path => pathname.startsWith(path));
   const isShopActive = pathname.startsWith(shopPath);
