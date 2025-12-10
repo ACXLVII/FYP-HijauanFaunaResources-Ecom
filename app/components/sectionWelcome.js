@@ -14,64 +14,18 @@ const SectionWelcome = () => {
   const slides = [
     {
       id: 1,
-      background: 'url(/images/home_page/welcome/promoBanner.png?v=2)',
-      content: null, // Remove CSS text since it's in the PNG
+      background: 'url(/images/home_page/welcome/slide1.png)',
+      content: null, // Text is in the PNG image
     },
     {
       id: 2,
-      background: 'url(/images/home_page/welcome/slide1.jpg)',
-      content: (
-        <div className="flex flex-col justify-center px-4 lg:px-8 items-center h-full">
-          <h1 className="mb-4 lg:mb-8 font-bold tracking-tight text-center text-3xl lg:text-4xl text-[#FFFFFF]">
-            Welcome to Hijauan Fauna Resources
-          </h1>
-          <p className="mb-4 lg:mb-8 text-center text-lg lg:text-2xl text-[#EEEEEE]">
-            Your one stop shop for landscaping needs.
-          </p>
-        </div>
-      ),
+      background: 'url(/images/home_page/welcome/slide2.png)',
+      content: null, // Text is in the PNG image
     },
     {
       id: 3,
-      background: 'url(/images/home_page/welcome/slide2.png)',
-      content: (
-        <div className="flex flex-col justify-center px-4 lg:px-8 items-center h-full">
-          <h1 className="mb-4 lg:mb-8 font-bold tracking-tight text-center text-3xl lg:text-4xl text-[#FFFFFF]">
-            Live & Artificial Grass Installation
-          </h1>
-          <p className="mb-4 lg:mb-8 text-center text-lg lg:text-2xl text-[#EEEEEE]">
-            Enhance your outdoor space with premium grass solutions.
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: 4,
-      background: 'url(/images/home_page/welcome/slide3.jpg)',
-      content: (
-        <div className="flex flex-col justify-center px-4 lg:px-8 items-center h-full">
-          <h1 className="mb-4 lg:mb-8 font-bold tracking-tight text-center text-3xl lg:text-4xl text-[#FFFFFF]">
-            Custom Lanscaping Services
-          </h1>
-          <p className="mb-4 lg:mb-8 text-center text-lg lg:text-2xl text-[#EEEEEE]">
-            Design your dream garden with our tailored landscaping services.
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: 5,
-      background: 'url(/images/home_page/welcome/slide4.png)',
-      content: (
-        <div className="flex flex-col items-center justify-center h-full px-4 lg:px-8">
-          <h1 className="mb-4 lg:mb-8 font-bold text-center text-3xl lg:text-4xl text-[#FFFFFF]">
-            Lawncare and Maintenance
-          </h1>
-          <p className="mb-4 lg:mb-8 text-center text-lg lg:text-2xl text-[#EEEEEE]">
-            Keep your yard healthy with our professional maintenance services.
-          </p>
-        </div>
-      ),
+      background: 'url(/images/home_page/welcome/slide3.png)',
+      content: null, // Text is in the PNG image
     },
   ];
 
@@ -80,7 +34,7 @@ const SectionWelcome = () => {
       <div 
         className="w-full"
         style={{
-          aspectRatio: '1920 / 710', // Match promoBanner.png high-res dimensions
+          aspectRatio: '16 / 9', // Standard widescreen aspect ratio for new banners
           minHeight: '300px', // Fallback for older browsers
         }}
       >
@@ -112,7 +66,7 @@ const SectionWelcome = () => {
                 }}
               >
                 {slide.content && (
-                  <div className={`w-full max-w-7xl mx-auto px-4 lg:px-8 ${slide.id === 1 ? '' : 'bg-[#000000]/70'}`}>
+                  <div className="w-full max-w-7xl mx-auto px-4 lg:px-8">
                     {slide.content}
                   </div>
                 )}
