@@ -1,7 +1,6 @@
 'use client';
 
 import React from "react";
-import Image from 'next/image';
 
 // Icon Imports
 import {
@@ -108,13 +107,25 @@ export default function ProductCard({ product }) {
     >
 
       {/* Cover Image */}
-      <Image
+      <img
         src={imageSrc}
         alt={product.name || 'Product image'}
         className="object-cover aspect-4/3 w-full"
-        width={800}
-        height={600}
-        unoptimized={imageSrc.startsWith('data:')} // Disable optimization for base64 images
+        onError={(e) => {
+          console.log('Image load error for product:', product.name, 'src:', e.target.src);
+          // Generate fallback on error
+          let identifier = (product.slug || product.name || '').toLowerCase();
+          if (identifier.includes('cow')) identifier = 'cow';
+          else if (identifier.includes('japanese')) identifier = 'japanese';
+          else if (identifier.includes('pearl')) identifier = 'pearl';
+          else if (identifier.includes('philippine')) identifier = 'philippine';
+          
+          if (identifier && e.target.src !== `/images/shop/live_grass/${identifier}/CoverImage.jpg`) {
+            e.target.src = `/images/shop/live_grass/${identifier}/CoverImage.jpg`;
+          } else if (e.target.src !== '/images/shop/LiveGrassTexture.jpg') {
+            e.target.src = '/images/shop/LiveGrassTexture.jpg';
+          }
+        }}
       />
 
       {/* Product Details BEGINS */}

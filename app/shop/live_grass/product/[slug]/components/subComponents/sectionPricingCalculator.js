@@ -285,10 +285,29 @@ export default function PricingCalculator({
 
     const finalArea = validPieces ? calculatedArea : area;
 
-    // Extract image string from object if needed
-    const imageString = typeof images[0] === 'string' 
-      ? images[0] 
-      : (typeof images[0] === 'object' && images[0].src ? images[0].src : '');
+    // Extract image string from object if needed, or generate fallback
+    let imageString = '';
+    
+    if (images && images[0]) {
+      imageString = typeof images[0] === 'string' 
+        ? images[0] 
+        : (typeof images[0] === 'object' && images[0].src ? images[0].src : '');
+    }
+    
+    // If no image from Firebase, use local fallback
+    if (!imageString) {
+      let identifier = (name || '').toLowerCase();
+      if (identifier.includes('cow')) identifier = 'cow';
+      else if (identifier.includes('japanese')) identifier = 'japanese';
+      else if (identifier.includes('pearl')) identifier = 'pearl';
+      else if (identifier.includes('philippine')) identifier = 'philippine';
+      
+      if (identifier) {
+        imageString = `/images/shop/live_grass/${identifier}/CoverImage.jpg`;
+      } else {
+        imageString = '/images/shop/LiveGrassTexture.jpg';
+      }
+    }
 
     addToCart({
       category,

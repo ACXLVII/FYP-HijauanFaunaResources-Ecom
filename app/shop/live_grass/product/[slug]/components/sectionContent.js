@@ -73,7 +73,7 @@ export default function SectionContent({product}) {
             
             {/* Image Slideshow */}
             <div className="">
-              <SectionImageSlideshow images={product.images} />
+              <SectionImageSlideshow images={product.images} productName={product.name} />
             </div>
             
             {/* Description */}
