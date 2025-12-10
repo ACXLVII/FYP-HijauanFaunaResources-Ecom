@@ -393,7 +393,7 @@ export default function Header() {
               <div ref={mobileShopRef}>
                 {/* Button */}
                 <div
-                  className="relative overflow-hidden z-54 h-30 bg-[url('/images/header/navigation/grass.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
+                  className="relative overflow-hidden z-54 h-30 bg-[url('/images/header/navigation/tips.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
                   onClick={() => setShowMobileShopList((prev) => !prev)}
                   tabIndex={0}
                   role="button"
@@ -434,7 +434,7 @@ export default function Header() {
 
               {/* Tips Button */}
               <div
-                className="relative overflow-hidden h-30 mb-4 bg-[url('/images/header/navigation/tips.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
+                className="relative overflow-hidden h-30 mb-4 bg-[url('/images/shop/grass.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
                 onClick={() => window.location.href = '/tips'}
                 tabIndex={0}
                 role="button"

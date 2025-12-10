@@ -14,7 +14,7 @@ export default function HomePage() {
     <div className='bg-[url("/images/backgrounds/SoilBackground.jpg")] bg-cover bg-center bg-fixed'>
       <Header />
       
-      <main className="mt-21 pt-8 lg:pt-16"> {/* padding for header + green bar */}
+      <main className="pt-21"> {/* padding for header + green bar */}
         <Welcome />
         <Prices />
         <Services />

@@ -30,51 +30,46 @@ const SectionWelcome = () => {
   ];
 
   return (
-    <section className="relative">
-      <div 
-        className="w-full"
-        style={{
-          aspectRatio: '16 / 9', // Standard widescreen aspect ratio for new banners
-          minHeight: '300px', // Fallback for older browsers
+    <section className="relative w-full">
+      <Swiper
+        modules={[EffectFade, Navigation, Pagination, Autoplay]}
+        spaceBetween={0}
+        effect="fade"
+        pagination={{
+          clickable: true,
+          type: 'bullets',
         }}
+        loop
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: true,
+        }}
+        className="w-full"
       >
-        <Swiper
-          modules={[EffectFade, Navigation, Pagination, Autoplay]}
-          spaceBetween={0}
-          effect="fade"
-          pagination={{
-            clickable: true,
-            type: 'bullets',
-          }}
-          loop
-          autoplay={{
-            delay: 5000,
-            disableOnInteraction: true,
-          }}
-          className="h-full w-full"
-        >
-          {slides.map((slide) => (
-            <SwiperSlide key={slide.id} className="h-full">
-              <div
-                className="flex items-center justify-center h-full w-full"
+        {slides.map((slide) => (
+          <SwiperSlide key={slide.id}>
+            <div className="w-full">
+              <img
+                src={slide.background.replace('url(', '').replace(')', '')}
+                alt={`Slide ${slide.id}`}
+                className="w-full h-auto object-contain"
                 style={{
-                  backgroundImage: slide.background,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  width: '100%',
-                  height: '100%',
+                  display: 'block',
+                  maxWidth: '100%',
+                  height: 'auto',
                 }}
-              >
-                {slide.content && (
+              />
+              {slide.content && (
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                   <div className="w-full max-w-7xl mx-auto px-4 lg:px-8">
                     {slide.content}
                   </div>
-                )}
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+                </div>
+              )}
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </section>
   );
 };
