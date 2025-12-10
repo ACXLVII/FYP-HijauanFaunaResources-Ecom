@@ -53,6 +53,35 @@ const IconMap = {
 };
 
 export default function ProductCard({ product }) {
+  // Generate fallback image path based on product slug or name
+  const getFallbackImage = () => {
+    if (product.images?.[0]) {
+      return product.images[0];
+    }
+    
+    // Try to generate path from slug or name
+    let identifier = (product.slug || product.name || '').toLowerCase();
+    
+    // Handle different naming variations
+    if (identifier.includes('cow')) {
+      identifier = 'cow';
+    } else if (identifier.includes('japanese')) {
+      identifier = 'japanese';
+    } else if (identifier.includes('pearl')) {
+      identifier = 'pearl';
+    } else if (identifier.includes('philippine')) {
+      identifier = 'philippine';
+    } else {
+      identifier = identifier.replace(/\s+/g, '_');
+    }
+    
+    if (identifier) {
+      return `/images/shop/live_grass/${identifier}/CoverImage.jpg`;
+    }
+    
+    return '/images/shop/LiveGrassTexture.jpg';
+  };
+
   return (
     <div
       className="block overflow-hidden bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg"
@@ -62,7 +91,7 @@ export default function ProductCard({ product }) {
 
       {/* Cover Image */}
       <img
-        src={product.images?.[0] || '/images/shop/LiveGrassTexture.jpg'}
+        src={getFallbackImage()}
         alt={product.name || 'Product image'}
         className="object-cover aspect-4/3 w-full"
       />
