@@ -9,13 +9,20 @@ function SectionImageSlideshow({ images }) {
 
   if (!images || images.length === 0) return null;
 
+  // Helper to get image source from string or object
+  const getImageSrc = (img) => {
+    if (typeof img === 'string') return img;
+    if (typeof img === 'object' && img.src) return img.src;
+    return '';
+  };
+
   return (
     <div className="overflow-hidden flex flex-col">
       
       {/* Preview */}
       <div className="relative aspect-[4/3] w-full">
         <img
-          src={images[selectedIndex]}
+          src={getImageSrc(images[selectedIndex])}
           alt={`Preview ${selectedIndex + 1}`}
           className="absolute inset-0 w-full h-full object-cover rounded-md lg:rounded-lg cursor-zoom-in"
           onClick={() => setModalOpen(true)}
@@ -26,8 +33,8 @@ function SectionImageSlideshow({ images }) {
       <div className="overflow-x-auto flex gap-2 lg:gap-4 mt-2 lg:mt-4 p-0.5">
         {images.map((img, idx) => (
           <img
-            key={img}
-            src={img}
+            key={idx}
+            src={getImageSrc(img)}
             alt={`Thumbnail ${idx + 1}`}
             className={`aspect-square h-16 lg:h-20 w-16 lg:w-20 object-cover rounded-md lg:rounded-lg transition ${
               idx === selectedIndex
@@ -56,7 +63,7 @@ function SectionImageSlideshow({ images }) {
               <IoCloseOutline className="size-10 lg:size-12 text-[#FFFFFF] active:text-[#E1C46A] cursor-pointer"/>
             </button>
             <img
-              src={images[selectedIndex]}
+              src={getImageSrc(images[selectedIndex])}
               alt={`Enlarged ${selectedIndex + 1}`}
               className="object-contain max-h-[90vh] max-w-[90vw]"
             />

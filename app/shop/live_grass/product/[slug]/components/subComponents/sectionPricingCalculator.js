@@ -285,11 +285,16 @@ export default function PricingCalculator({
 
     const finalArea = validPieces ? calculatedArea : area;
 
+    // Extract image string from object if needed
+    const imageString = typeof images[0] === 'string' 
+      ? images[0] 
+      : (typeof images[0] === 'object' && images[0].src ? images[0].src : '');
+
     addToCart({
       category,
       id,
       name,
-      image: images[0],
+      image: imageString,
       quantity,
       price: (selectedGroup.price * quantity).toFixed(2),
       priceID_TEST: selectedGroup.priceID_TEST,

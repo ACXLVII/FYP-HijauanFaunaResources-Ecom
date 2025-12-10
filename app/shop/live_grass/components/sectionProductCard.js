@@ -1,6 +1,7 @@
 'use client';
 
 import React from "react";
+import Image from 'next/image';
 
 // Icon Imports
 import {
@@ -53,34 +54,51 @@ const IconMap = {
 };
 
 export default function ProductCard({ product }) {
-  // Generate fallback image path based on product slug or name
-  const getFallbackImage = () => {
-    if (product.images?.[0]) {
-      return product.images[0];
+  // Helper function to convert base64 string to data URI
+  const getImageSrc = (imageData) => {
+    if (!imageData) {
+      // Generate fallback path from product name
+      let identifier = (product.slug || product.name || '').toLowerCase();
+      
+      // Handle different naming variations
+      if (identifier.includes('cow')) {
+        identifier = 'cow';
+      } else if (identifier.includes('japanese')) {
+        identifier = 'japanese';
+      } else if (identifier.includes('pearl')) {
+        identifier = 'pearl';
+      } else if (identifier.includes('philippine')) {
+        identifier = 'philippine';
+      } else {
+        identifier = identifier.replace(/\s+/g, '_');
+      }
+      
+      if (identifier) {
+        return `/images/shop/live_grass/${identifier}/CoverImage.jpg`;
+      }
+      
+      return '/images/shop/LiveGrassTexture.jpg';
     }
     
-    // Try to generate path from slug or name
-    let identifier = (product.slug || product.name || '').toLowerCase();
+    // Handle if imageData is an object with src property
+    const imageString = typeof imageData === 'object' && imageData.src ? imageData.src : imageData;
     
-    // Handle different naming variations
-    if (identifier.includes('cow')) {
-      identifier = 'cow';
-    } else if (identifier.includes('japanese')) {
-      identifier = 'japanese';
-    } else if (identifier.includes('pearl')) {
-      identifier = 'pearl';
-    } else if (identifier.includes('philippine')) {
-      identifier = 'philippine';
-    } else {
-      identifier = identifier.replace(/\s+/g, '_');
+    // If it's not a string, return fallback
+    if (typeof imageString !== 'string') {
+      return getImageSrc(null);
     }
     
-    if (identifier) {
-      return `/images/shop/live_grass/${identifier}/CoverImage.jpg`;
+    // If it's already a data URI or URL, return as is
+    if (imageString.startsWith('data:') || imageString.startsWith('http') || imageString.startsWith('/')) {
+      return imageString;
     }
     
-    return '/images/shop/LiveGrassTexture.jpg';
+    // If it's a base64 string without prefix, add the data URI prefix
+    const imageType = 'jpeg';
+    return `data:image/${imageType};base64,${imageString}`;
   };
+  
+  const imageSrc = product.images?.[0] ? getImageSrc(product.images[0]) : getImageSrc(null);
 
   return (
     <div
@@ -90,10 +108,13 @@ export default function ProductCard({ product }) {
     >
 
       {/* Cover Image */}
-      <img
-        src={getFallbackImage()}
+      <Image
+        src={imageSrc}
         alt={product.name || 'Product image'}
         className="object-cover aspect-4/3 w-full"
+        width={800}
+        height={600}
+        unoptimized={imageSrc.startsWith('data:')} // Disable optimization for base64 images
       />
 
       {/* Product Details BEGINS */}
