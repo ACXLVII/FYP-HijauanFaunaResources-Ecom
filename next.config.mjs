@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable caching for development
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
+  },
   async headers() {
     return [
       {
