@@ -11,8 +11,7 @@ export default async function ProductPage({ params }) {
   const host = headersList.get('host');
   const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
   const res = await fetch(`${protocol}://${host}/api/artificial_grass/${slug}`, { 
-    cache: 'force-cache',
-    next: { revalidate: 3600 } // Revalidate every hour
+    cache: 'no-store' // Disable caching due to large payload size (base64 images)
   });
   
   if (!res.ok) {

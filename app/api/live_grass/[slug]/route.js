@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { db } from '@/app/firebase';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 
+// Disable Next.js caching for this route due to large payload size (base64 images)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request, { params }) {
   const { slug } = await params;
 
@@ -17,11 +21,7 @@ export async function GET(request, { params }) {
       if (docSnap.exists()) {
         const data = docSnap.data();
         data.doc_id = docSnap.id;
-        return NextResponse.json(data, {
-          headers: {
-            'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
-          }
-        });
+        return NextResponse.json(data);
       }
     } catch (error) {
       // If doc_id lookup fails, continue to return 404
@@ -34,10 +34,5 @@ export async function GET(request, { params }) {
   const data = doc.data();
   data.doc_id = doc.id;
 
-  // Add cache headers for better performance
-  return NextResponse.json(data, {
-    headers: {
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
-    }
-  });
+  return NextResponse.json(data);
 }

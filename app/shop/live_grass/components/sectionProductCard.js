@@ -136,6 +136,17 @@ export default function ProductCard({ product }) {
           {product.name}
         </h1>
 
+        {/* Stock Status */}
+        <div className="mb-4 lg:mb-8">
+          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm lg:text-md font-semibold ${
+            product.inStock 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {product.inStock ? '✓ In Stock' : '✗ Out of Stock'}
+          </div>
+        </div>
+
         {/* Features */}
         <div className="grid grid-cols-1 grid-rows-3 gap-2 lg:gap-4 mb-4 lg:mb-8">
           {Array.isArray(product.features) && product.features.map((features, idx) => {
@@ -185,11 +196,16 @@ export default function ProductCard({ product }) {
 
         {/* Button */}
         <button
-          className="w-full p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95"
-          onClick={() => window.location.href = `/shop/live_grass/product/${product.doc_id}`}
+          className={`w-full p-2 lg:p-4 rounded-lg lg:rounded-xl shadow-lg transition ${
+            product.inStock
+              ? 'bg-[#498118] hover:scale-105 active:scale-95 active:shadow-none cursor-pointer'
+              : 'bg-[#AAAAAA] cursor-not-allowed'
+          }`}
+          onClick={() => product.inStock && (window.location.href = `/shop/live_grass/product/${product.doc_id}`)}
+          disabled={!product.inStock}
         >
           <h1 className="flex items-center justify-center font-bold tracking-tight text-lg lg:text-xl text-[#FFFFFF]">
-            Select
+            {product.inStock ? 'Select' : 'Out of Stock'}
           </h1>
         </button>
 

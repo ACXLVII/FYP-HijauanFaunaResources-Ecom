@@ -89,7 +89,7 @@ function parseAreaFromMeasurement(measurement) {
 }
 
 export default function PricingCalculator({
-  category, id, name, images, priceGroup
+  category, id, name, images, priceGroup, inStock
 }) {
   // All hooks must be called before any conditional returns
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -275,6 +275,12 @@ export default function PricingCalculator({
   }
 
   const handleAddToCart = () => {
+    // Check if out of stock
+    if (!inStock) {
+      toast.error('This product is currently out of stock.');
+      return;
+    }
+
     // Require either area or pieces to be valid
     if ((!userArea || !validArea) && (!userPieces || !validPieces)) {
       setTouched(true);
@@ -325,11 +331,25 @@ export default function PricingCalculator({
     toast.success(`Added to cart! Total: RM ${totalPrice.toFixed(2)}`);
   };
 
-  const hasValidInput = validArea || validPieces;
+  const hasValidInput = (validArea || validPieces) && inStock;
 
   return (
     <div className="space-y-4 lg:space-y-8 p-4 lg:p-8 bg-[#FFFFFF] rounded-lg lg:rounded-xl shadow-lg">
       <Toaster position="top-center" />
+
+      {/* Stock Status */}
+      <div className="">
+        <div className="mb-2 lg:mb-4 font-semibold text-md lg:text-lg text-[#101828]">
+          Availability:
+        </div>
+        <div className={`inline-flex items-center px-4 py-2 rounded-lg text-md lg:text-lg font-semibold ${
+          inStock 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {inStock ? '✓ In Stock' : '✗ Out of Stock'}
+        </div>
+      </div>
 
       {/* Unit selector if multiple price groups */}
       <div className="">
@@ -600,4 +620,5 @@ PricingCalculator.propTypes = {
   name: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   category: PropTypes.string.isRequired,
+  inStock: PropTypes.bool.isRequired,
 };

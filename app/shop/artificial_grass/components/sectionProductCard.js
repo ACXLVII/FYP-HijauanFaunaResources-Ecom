@@ -64,24 +64,26 @@ const IconMap = {
 
 export default function ProductCard({ product }) {
   
-  // Helper function to convert base64 string to data URI
+  // Helper function to convert base64 string to data URI (matching live_grass pattern)
   const getImageSrc = (imageData) => {
     if (!imageData) return '/images/shop/ArtificialGrassTexture.jpg';
+    
+    // Handle if imageData is an object with src property
+    const imageString = typeof imageData === 'object' && imageData.src ? imageData.src : imageData;
+    
+    // If it's not a string, return fallback
+    if (typeof imageString !== 'string') {
+      return '/images/shop/ArtificialGrassTexture.jpg';
+    }
+    
     // If it's already a data URI or URL, return as is
-    if (imageData.startsWith('data:') || imageData.startsWith('http') || imageData.startsWith('/')) {
-      return imageData;
+    if (imageString.startsWith('data:') || imageString.startsWith('http') || imageString.startsWith('/')) {
+      return imageString;
     }
-    // If it's a base64 string, convert to data URI
-    // Try to detect image type, default to jpeg
-    const imageType = imageData.match(/^data:image\/(\w+);base64,/) 
-      ? imageData.split(';')[0].split('/')[1] 
-      : 'jpeg';
-    // If it already has the data URI prefix, return as is
-    if (imageData.startsWith('data:')) {
-      return imageData;
-    }
-    // Otherwise, add the data URI prefix
-    return `data:image/${imageType};base64,${imageData}`;
+    
+    // If it's a base64 string without prefix, add the data URI prefix
+    const imageType = 'jpeg';
+    return `data:image/${imageType};base64,${imageString}`;
   };
   const imageSrc = product.images?.[0] ? getImageSrc(product.images[0]) : '/images/shop/ArtificialGrassTexture.jpg';
 
@@ -109,6 +111,17 @@ export default function ProductCard({ product }) {
         <h1 className="mb-4 lg:mb-8 font-bold tracking-tight text-2xl lg:text-3xl text-[#101828]">
           {product.name}
         </h1>
+
+        {/* Stock Status */}
+        <div className="mb-4 lg:mb-8">
+          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm lg:text-md font-semibold ${
+            product.inStock 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {product.inStock ? '✓ In Stock' : '✗ Out of Stock'}
+          </div>
+        </div>
 
         {/* Features */}
         <div className="grid grid-cols-1 grid-rows-3 gap-2 lg:gap-4 mb-4 lg:mb-8">
@@ -159,11 +172,16 @@ export default function ProductCard({ product }) {
 
         {/* Button */}
         <button
-          className="w-full p-2 lg:p-4 bg-[#498118] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95"
-          onClick={() => window.location.href = `/shop/artificial_grass/product/${product.doc_id}`}
+          className={`w-full p-2 lg:p-4 rounded-lg lg:rounded-xl shadow-lg transition ${
+            product.inStock
+              ? 'bg-[#498118] hover:scale-105 active:scale-95 active:shadow-none cursor-pointer'
+              : 'bg-[#AAAAAA] cursor-not-allowed'
+          }`}
+          onClick={() => product.inStock && (window.location.href = `/shop/artificial_grass/product/${product.doc_id}`)}
+          disabled={!product.inStock}
         >
           <h1 className="flex items-center justify-center font-bold tracking-tight text-lg lg:text-xl text-[#FFFFFF]">
-            Select
+            {product.inStock ? 'Select' : 'Out of Stock'}
           </h1>
         </button>
 

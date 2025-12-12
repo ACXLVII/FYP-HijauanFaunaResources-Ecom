@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { db } from '@/app/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
+// Disable Next.js caching for this route due to large payload size (base64 images)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   const querySnapshot = await getDocs(collection(db, "ArtificialGrass"));
   const productsArr = [];

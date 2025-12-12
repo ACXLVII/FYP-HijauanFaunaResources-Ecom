@@ -25,7 +25,6 @@ import {
   PiPottedPlant
 } from "react-icons/pi";
 import {
-  TbFountain,
   TbGardenCart,
   TbShovelPitchforks,
   TbTrees
@@ -139,12 +138,12 @@ const navigation = {
             {
               id: '1',
               name: 'Decorative',
-              href: '/decorative_plants',
+              href: '/shop/decorative_plants',
             },
             {
               id: '2',
               name: 'Produce',
-              href: '/produce_plants',
+              href: '/shop/produce_plants',
             },
           ],
         },
@@ -156,29 +155,12 @@ const navigation = {
             {
               id: '1',
               name: 'Boulders',
-              href: '/boulder_rocks',
+              href: '/shop/boulder_rocks',
             },
             {
               id: '2',
               name: 'Pebbles',
-              href: '/pebble_rocks',
-            },
-          ],
-        },
-        {
-          id: '4',
-          name: 'Others',
-          icon: TbFountain,
-          subCategories: [
-            {
-              id: '1',
-              name: 'Furniture',
-              href: '/furniture',
-            },
-            {
-              id: '2',
-              name: 'Ornaments',
-              href: '/ornaments',
+              href: '/shop/pebble_rocks',
             },
           ],
         },

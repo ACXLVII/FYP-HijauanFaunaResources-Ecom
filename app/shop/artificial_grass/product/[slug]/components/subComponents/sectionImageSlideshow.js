@@ -12,11 +12,26 @@ function SectionImageSlideshow({ images }) {
 
   if (!images || images.length === 0) return null;
 
-  // Helper to get image source from string or object
-  const getImageSrc = (img) => {
-    if (typeof img === 'string') return img;
-    if (typeof img === 'object' && img.src) return img.src;
-    return '';
+  // Helper function to convert base64 string to data URI (matching live_grass pattern)
+  const getImageSrc = (imageData) => {
+    if (!imageData) return '';
+    
+    // Handle if imageData is an object with src property
+    const imageString = typeof imageData === 'object' && imageData.src ? imageData.src : imageData;
+    
+    // If it's not a string, return empty
+    if (typeof imageString !== 'string') {
+      return '';
+    }
+    
+    // If it's already a data URI or URL, return as is
+    if (imageString.startsWith('data:') || imageString.startsWith('http') || imageString.startsWith('/')) {
+      return imageString;
+    }
+    
+    // If it's a base64 string without prefix, add the data URI prefix
+    const imageType = 'jpeg';
+    return `data:image/${imageType};base64,${imageString}`;
   };
 
   return (

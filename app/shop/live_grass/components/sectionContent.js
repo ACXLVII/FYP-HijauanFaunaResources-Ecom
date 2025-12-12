@@ -11,8 +11,7 @@ export default async function SectionContent() {
   let products = [];
   try {
     const res = await fetch(`${protocol}://${host}/api/live_grass`, { 
-      cache: 'force-cache',
-      next: { revalidate: 3600 } // Revalidate every hour
+      cache: 'no-store' // Disable caching due to large payload size (base64 images)
     });
     if (res.ok) {
       const data = await res.json();

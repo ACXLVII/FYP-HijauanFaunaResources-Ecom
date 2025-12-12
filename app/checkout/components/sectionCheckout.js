@@ -378,11 +378,42 @@ export default function SectionCheckout() {
       //   return;
       // }
 
-      // Prepare line items for Stripe
-      const lineItems = productsInCart.map(product => ({
-        price: product.priceID_TEST,
-        quantity: product.quantity,
-      }));
+      // Prepare line items for Stripe - filter out products without valid priceID_TEST
+      const lineItems = productsInCart
+        .filter(product => {
+          if (!product.priceID_TEST) {
+            console.warn('Product missing priceID_TEST:', product);
+            return false;
+          }
+          // Ensure quantity is valid
+          const qty = typeof product.quantity === 'string' ? parseInt(product.quantity, 10) : Number(product.quantity);
+          if (!qty || qty <= 0 || isNaN(qty)) {
+            console.warn('Product has invalid quantity:', product);
+            return false;
+          }
+          return true;
+        })
+        .map(product => {
+          // Ensure quantity is a number
+          const quantity = typeof product.quantity === 'string' ? parseInt(product.quantity, 10) : Number(product.quantity);
+          return {
+            price: product.priceID_TEST,
+            quantity: quantity,
+          };
+        });
+
+      // Check if any products were filtered out
+      if (lineItems.length === 0) {
+        toast.error("Error: Some products in your cart are missing pricing information. Please remove and re-add them.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (lineItems.length < productsInCart.length) {
+        toast.error("Some products in your cart could not be processed. Please remove items without pricing and try again.");
+        setIsSubmitting(false);
+        return;
+      }
 
       // const lineItems = [
       //   // LIVE GRASS
@@ -454,6 +485,44 @@ export default function SectionCheckout() {
       //   }
       // ]
 
+      // Helper function to ensure metadata values don't exceed 500 characters
+      const truncateMetadata = (value, maxLength = 500) => {
+        const str = typeof value === 'string' ? value : JSON.stringify(value);
+        if (str.length <= maxLength) return str;
+        console.warn(`Metadata value truncated from ${str.length} to ${maxLength} characters`);
+        return str.substring(0, maxLength);
+      };
+
+      // Minimize products data - only store essential info to reduce size
+      const minimizedProducts = selectedProductFields.map(product => ({
+        id: product.id,
+        qty: product.quantity,
+        size: product.sizeType,
+      }));
+
+      // Prepare metadata with truncation
+      const addressDetailsStr = orderData.requestShipping ? JSON.stringify(orderData.addressDetails) : '';
+      const productsStr = JSON.stringify(minimizedProducts);
+      
+      const metadata = {
+        customerName: truncateMetadata(orderData.name),
+        customerEmail: truncateMetadata(orderData.email),
+        customerPhone: truncateMetadata(orderData.phone),
+        requestShipping: orderData.requestShipping ? 'true' : 'false',
+        addressDetails: truncateMetadata(addressDetailsStr),
+        distance: orderData.requestShipping ? distance.toString() : '0',
+        shippingCost: orderData.requestShipping ? shippingCost.toString() : '0',
+        products: truncateMetadata(productsStr),
+        total: total.toString(),
+      };
+
+      // Log metadata sizes for debugging
+      Object.entries(metadata).forEach(([key, value]) => {
+        if (value.length > 450) {
+          console.warn(`Metadata field "${key}" is ${value.length} characters (close to 500 limit)`);
+        }
+      });
+
       // Create checkout session
       console.log("Line Items:", lineItems);
       const response = await fetch('/api/create-checkout-session', {
@@ -466,25 +535,32 @@ export default function SectionCheckout() {
           customerEmail: orderData.email,
           requestShipping: orderData.requestShipping,
           shippingCost: orderData.requestShipping ? shippingCost : 0,
-          metadata: {
-            customerName: orderData.name,
-            customerEmail: orderData.email,
-            customerPhone: orderData.phone,
-            requestShipping: orderData.requestShipping,
-            addressDetails: orderData.requestShipping ? JSON.stringify(orderData.addressDetails) : '',
-            distance: orderData.requestShipping ? distance.toString() : '0',
-            shippingCost: orderData.requestShipping ? shippingCost.toString() : '0',
-            products: JSON.stringify(selectedProductFields),
-            total: total.toString(),
-          },
+          metadata: metadata,
         }),
       });
-      console.log("Metadata: ", orderData.metadata);
+
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error occurred' }));
+        console.error('Checkout API Error:', errorData);
+        toast.error(errorData.details || errorData.error || "Error creating checkout session. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
 
       const { sessionId, error } = await response.json();
 
       if (error) {
-        toast.error("Error creating checkout session");
+        console.error('Checkout Session Error:', error);
+        toast.error(error.details || error || "Error creating checkout session. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!sessionId) {
+        console.error('No session ID returned from API');
+        toast.error("Error creating checkout session. Please try again.");
+        setIsSubmitting(false);
         return;
       }
 

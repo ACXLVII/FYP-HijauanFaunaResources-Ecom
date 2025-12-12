@@ -119,6 +119,7 @@ export default function SectionContent({product}) {
                 name={product.name}
                 images={product.images}
                 priceGroup={product.priceGroup}
+                inStock={product.inStock}
               />
             </div>
 
