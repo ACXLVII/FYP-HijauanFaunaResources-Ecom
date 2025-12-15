@@ -8,9 +8,10 @@ import { useCart } from '@/app/hooks/useCart';
 // Icon Imports
 import { TbGardenCartOff } from "react-icons/tb";
 import { RxCross2 } from "react-icons/rx";
+import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
 
 export default function SectionCart() {
-  const { cart, removeFromCart, getTotalPrice } = useCart();
+  const { cart, removeFromCart, updateCartItemQuantity, getTotalPrice } = useCart();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -85,12 +86,62 @@ export default function SectionCart() {
                           </h2>
                         </div>
                         <div className="">
-                          <p className="text-md lg:text-lg text-[#4A5565]">
-                            Quantity: <span className="font-bold text-[#C39533]">{product.quantity}</span> {product.sizeType}(s)
-                          </p>
-                          <p className="text-md lg:text-lg text-[#4A5565]">
-                            For: <span className="font-bold text-[#C39533]">{product.requestedArea}</span> sq ft
-                          </p>
+                          <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-1 lg:mb-2">
+                            <p className="text-md lg:text-lg text-[#4A5565]">
+                              Quantity:
+                            </p>
+                            <div className="flex items-center gap-0 border-2 border-[#C39533] rounded-md lg:rounded-lg bg-[#FFFFFF]">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentQty = parseInt(product.quantity) || 1;
+                                  updateCartItemQuantity(product.cartId, currentQty - 1);
+                                }}
+                                className="p-1.5 lg:p-2 hover:bg-[#C39533]/20 active:bg-[#C39533]/30 transition rounded-l-md lg:rounded-l-lg"
+                                aria-label="Decrease quantity"
+                              >
+                                <AiOutlineMinus className="size-4 lg:size-5 text-[#C39533]" />
+                              </button>
+                              <input
+                                type="number"
+                                min="1"
+                                value={product.quantity}
+                                onChange={(e) => {
+                                  const newQty = parseInt(e.target.value) || 1;
+                                  if (newQty > 0) {
+                                    updateCartItemQuantity(product.cartId, newQty);
+                                  }
+                                }}
+                                onBlur={(e) => {
+                                  const newQty = parseInt(e.target.value) || 1;
+                                  if (newQty < 1) {
+                                    updateCartItemQuantity(product.cartId, 1);
+                                  }
+                                }}
+                                className="font-bold text-md lg:text-lg text-[#C39533] w-16 lg:w-20 text-center px-2 lg:px-3 border-x-2 border-[#C39533] focus:outline-none focus:ring-2 focus:ring-[#C39533]/50"
+                                aria-label="Quantity"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentQty = parseInt(product.quantity) || 1;
+                                  updateCartItemQuantity(product.cartId, currentQty + 1);
+                                }}
+                                className="p-1.5 lg:p-2 hover:bg-[#C39533]/20 active:bg-[#C39533]/30 transition rounded-r-md lg:rounded-r-lg"
+                                aria-label="Increase quantity"
+                              >
+                                <AiOutlinePlus className="size-4 lg:size-5 text-[#C39533]" />
+                              </button>
+                            </div>
+                            <p className="text-md lg:text-lg text-[#4A5565]">
+                              {product.sizeType}(s)
+                            </p>
+                          </div>
+                          {product.requestedArea && (
+                            <p className="text-md lg:text-lg text-[#4A5565]">
+                              For: <span className="font-bold text-[#C39533]">{product.requestedArea}</span> sq ft
+                            </p>
+                          )}
                           {/* <p className="font-bold tracking-tight text-md lg:text-lg text-[#498118]">
                             RM {parseFloat(product.price).toFixed(2)}
                           </p> */}

@@ -114,6 +114,57 @@ export function CartProvider({ children }) {
     });
   };
 
+  // Update item quantity by cartId
+  const updateCartItemQuantity = (cartId, newQuantity) => {
+    if (newQuantity <= 0) {
+      // If quantity is 0 or less, remove the item
+      removeFromCart(cartId);
+      return;
+    }
+
+    setCart((prevCart) => {
+      return prevCart.map((item) => {
+        if (item.cartId === cartId) {
+          // Calculate unit price from current price and quantity
+          const currentPrice = parseFloat(item.price) || 0;
+          const currentQuantity = parseInt(item.quantity) || 1;
+          const unitPrice = currentPrice / currentQuantity;
+          
+          // Calculate new total price
+          const newPrice = (unitPrice * newQuantity).toFixed(2);
+          
+          // Calculate new requestedArea based on quantity
+          let newRequestedArea = item.requestedArea;
+          if (item.requestedArea !== undefined && item.requestedArea !== null) {
+            const currentArea = parseFloat(item.requestedArea) || 0;
+            const sizeType = item.sizeType?.toLowerCase() || '';
+            
+            // If sizeType is 'sqft' or 'square foot', area equals quantity
+            if (sizeType === 'sqft' || sizeType === 'square foot') {
+              newRequestedArea = newQuantity;
+            } else if (currentQuantity > 0 && currentArea > 0) {
+              // Calculate area per unit and multiply by new quantity
+              const areaPerUnit = currentArea / currentQuantity;
+              const calculatedArea = areaPerUnit * newQuantity;
+              // Round to 2 decimal places, but remove trailing zeros for whole numbers
+              newRequestedArea = calculatedArea % 1 === 0 
+                ? calculatedArea 
+                : parseFloat(calculatedArea.toFixed(2));
+            }
+          }
+          
+          return {
+            ...item,
+            quantity: newQuantity,
+            price: newPrice,
+            requestedArea: newRequestedArea,
+          };
+        }
+        return item;
+      });
+    });
+  };
+
   // Clear the cart
   const clearCart = () => {
     setCart([]);
@@ -134,6 +185,7 @@ export function CartProvider({ children }) {
         cart,
         addToCart,
         removeFromCart,
+        updateCartItemQuantity,
         clearCart,
         getTotalPrice,
         getCartCount,

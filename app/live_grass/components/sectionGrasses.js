@@ -133,6 +133,7 @@ export default function SectionGrasses() {
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/japanese.glb"
                     iosSrc="/models/live_grass/japanese.usdz"
+                    arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
                       <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
@@ -195,6 +196,7 @@ export default function SectionGrasses() {
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/philippine.glb"
                     iosSrc="/models/live_grass/philippine.usdz"
+                    arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
                       <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
@@ -257,6 +259,7 @@ export default function SectionGrasses() {
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/pearl.glb"
                     iosSrc="/models/live_grass/pearl.usdz"
+                    arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
                       <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
@@ -319,6 +322,7 @@ export default function SectionGrasses() {
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
                     modelSrc="/models/live_grass/cow.glb"
                     iosSrc="/models/live_grass/cow.usdz"
+                    arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
                       <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
