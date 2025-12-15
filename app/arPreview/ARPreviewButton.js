@@ -19,36 +19,45 @@ export default function ARPreviewButton({
   const [isIOS, setIsIOS] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
+  // STEP 1: Initialize client-side detection
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     setIsClient(true);
     
-    // Better iOS/iPad detection (iPadOS 13+ identifies as Mac)
-    const isAppleDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
-                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    setIsIOS(isAppleDevice);
-    
+    // STEP 2: Detect mobile devices
     const checkMobile = () => {
       const isMobileDevice = window.innerWidth <= 1024 || 
-                             /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
-                             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                             /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       setIsMobile(isMobileDevice);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Load model-viewer only for Android
-    const isAppleCheck = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
-                         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (!isAppleCheck) {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
-      document.head.appendChild(script);
-    }
+    // STEP 3: Load model-viewer only for non-iOS devices
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
+    document.head.appendChild(script);
 
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // STEP 4: Detect iOS devices (separate effect for clarity)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Method 1: Check user agent for iPhone/iPad/iPod
+    const userAgentCheck = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    // Method 2: Check for iPadOS 13+ (identifies as MacIntel with touch)
+    const iPadOSCheck = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    
+    // Method 3: Check for iOS in vendor
+    const vendorCheck = /iPad|iPhone|iPod/.test(navigator.vendor);
+    
+    // Set iOS if any check passes
+    setIsIOS(userAgentCheck || iPadOSCheck || vendorCheck);
   }, []);
 
   const handleClick = () => {
@@ -61,45 +70,32 @@ export default function ARPreviewButton({
   const handleStartAR = () => {
     setShowInstructions(false);
 
-    console.log('AR Start - iOS:', isIOS, 'iosSrc:', iosSrc);
-    console.log('User Agent:', navigator.userAgent);
-    console.log('Platform:', navigator.platform);
-    console.log('Touch Points:', navigator.maxTouchPoints);
-
-    // iOS: Use direct anchor link to USDZ
+    // STEP 5: Handle iOS AR with Quick Look
     if (isIOS && iosSrc) {
-      console.log('iOS path: Creating direct Quick Look link');
+      // Create anchor element for Quick Look
+      const arAnchor = document.createElement('a');
+      arAnchor.rel = 'ar';
+      arAnchor.href = iosSrc;
       
-      // Create and trigger Quick Look link
-      const anchor = document.createElement('a');
-      anchor.rel = 'ar';
-      anchor.href = iosSrc;
+      // Append to body
+      document.body.appendChild(arAnchor);
       
-      // Try multiple methods to ensure it works
-      document.body.appendChild(anchor);
+      // Trigger click to open Quick Look
+      arAnchor.click();
       
-      // Method 1: Direct click
-      anchor.click();
-      
-      // Method 2: Dispatch event (fallback)
+      // Cleanup after a short delay
       setTimeout(() => {
-        const clickEvent = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        anchor.dispatchEvent(clickEvent);
-      }, 50);
+        if (document.body.contains(arAnchor)) {
+          document.body.removeChild(arAnchor);
+        }
+      }, 100);
       
-      setTimeout(() => document.body.removeChild(anchor), 500);
       return;
     }
 
-    console.log('Android path: Creating model-viewer');
-    // Android: Use model-viewer (will be added dynamically)
+    // STEP 6: Handle Android/Web AR with model-viewer
     const existingViewer = document.querySelector('#temp-ar-viewer');
     if (existingViewer) {
-      console.log('Removing existing viewer');
       existingViewer.remove();
     }
 

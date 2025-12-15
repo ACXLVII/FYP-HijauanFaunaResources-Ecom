@@ -127,8 +127,9 @@ export default function SectionThickness() {
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
                   <ARPreviewMultiPlacement
-                    glbSrc="/models/artificial_grass/15mm.glb"
-                    usdzSrc="/models/artificial_grass/15mm.usdz"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/15mm.glb"
+                    iosSrc="/models/artificial_grass/15mm.usdz"
                     arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -187,8 +188,9 @@ export default function SectionThickness() {
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
                   <ARPreviewMultiPlacement
-                    glbSrc="/models/artificial_grass/25mm.glb"
-                    usdzSrc="/models/artificial_grass/25mm.usdz"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/25mm.glb"
+                    iosSrc="/models/artificial_grass/25mm.usdz"
                     arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -247,8 +249,9 @@ export default function SectionThickness() {
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
                   <ARPreviewMultiPlacement
-                    glbSrc="/models/artificial_grass/30mm.glb"
-                    usdzSrc="/models/artificial_grass/30mm.usdz"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/30mm.glb"
+                    iosSrc="/models/artificial_grass/30mm.usdz"
                     arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -307,8 +310,9 @@ export default function SectionThickness() {
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
                   <ARPreviewMultiPlacement
-                    glbSrc="/models/artificial_grass/35mm.glb"
-                    usdzSrc="/models/artificial_grass/35mm.usdz"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/35mm.glb"
+                    iosSrc="/models/artificial_grass/35mm.usdz"
                     arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
@@ -367,8 +371,9 @@ export default function SectionThickness() {
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
                   <ARPreviewMultiPlacement
-                    glbSrc="/models/artificial_grass/40mm.glb"
-                    usdzSrc="/models/artificial_grass/40mm.usdz"
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/40mm.glb"
+                    iosSrc="/models/artificial_grass/40mm.usdz"
                     arPlacement="floor"
                   >
                     <div className="flex items-center justify-center gap-2 lg:gap-4">
