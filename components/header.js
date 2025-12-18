@@ -400,9 +400,10 @@ export default function Header() {
                   <div className="p-4 space-y-4">
                     <Link href="/shop/live_grass" className="block text-gray-600">Live Grass</Link>
                     <Link href="/shop/artificial_grass" className="block text-gray-600">Artificial Grass</Link>
-                    <Link href="/shop/Plants" className="block text-gray-600">Plants</Link>
-                    <Link href="/shop/Rocks" className="block text-gray-600">Rocks</Link>
-                    <Link href="/shop/Others" className="block text-gray-600">Others</Link>
+                    <Link href="/shop/decorative_plants" className="block text-gray-600">Decorative Plants</Link>
+                    <Link href="/shop/produce_plants" className="block text-gray-600">Produce Plants</Link>
+                    <Link href="/shop/boulder_rocks" className="block text-gray-600">Boulder Rocks</Link>
+                    <Link href="/shop/pebble_rocks" className="block text-gray-600">Pebble Rocks</Link>
                   </div>
                 </div>
               </div>
