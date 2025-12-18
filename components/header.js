@@ -328,7 +328,7 @@ export default function Header() {
               <div ref={mobileGrassRef}>
                 {/* Button */}
                 <div
-                  className="relative overflow-hidden z-54 h-30 bg-[url('/images/header/navigation/grass.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
+                  className="relative overflow-hidden z-54 h-30 bg-[url('/images/header/navigation/Grass.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
                   onClick={() => setShowMobileGrassList((prev) => !prev)}
                   tabIndex={0}
                   role="button"
@@ -354,7 +354,7 @@ export default function Header() {
 
               {/* Landscaping Button */}
               <div
-                className="relative overflow-hidden h-30 mb-4 bg-[url('/images/header/navigation/landscaping.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
+                className="relative overflow-hidden h-30 mb-4 bg-[url('/images/header/navigation/Landscaping.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
                 onClick={() => window.location.href = '/landscaping'}
                 tabIndex={0}
                 role="button"
@@ -366,7 +366,7 @@ export default function Header() {
               
               {/* Maintenance Button */}
               <div
-                className="relative overflow-hidden h-30 mb-4 bg-[url('/images/header/navigation/maintenance.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
+                className="relative overflow-hidden h-30 mb-4 bg-[url('/images/header/navigation/Maintenance.jpg')] bg-cover bg-center rounded-lg shadow-lg active:shadow-none transition active:scale-99"
                 onClick={() => window.location.href = '/maintenance'}
                 tabIndex={0}
                 role="button"
