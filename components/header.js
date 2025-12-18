@@ -342,7 +342,7 @@ export default function Header() {
                   className={`
                     overflow-hidden z-53 mb-4 bg-white rounded-lg shadow-inner
                     origin-top transition-all duration-300 ease-in-out
-                    ${showMobileGrassList ? 'max-h-24 opacity-100 translate-y-0 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 pointer-events-none'}
+                    ${showMobileGrassList ? 'max-h-fit opacity-100 translate-y-0 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 pointer-events-none'}
                   `}
                 >
                   <div className="p-4 space-y-4">
@@ -394,7 +394,7 @@ export default function Header() {
                   className={`
                     overflow-hidden z-53 mb-4 bg-white rounded-lg shadow-inner
                     origin-top transition-all duration-300 ease-in-out
-                    ${showMobileShopList ? 'max-h-54 opacity-100 translate-y-0 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 pointer-events-none'}
+                    ${showMobileShopList ? 'max-h-fit opacity-100 translate-y-0 pointer-events-auto' : 'max-h-0 opacity-0 -translate-y-4 pointer-events-none'}
                   `}
                 >
                   <div className="p-4 space-y-4">
