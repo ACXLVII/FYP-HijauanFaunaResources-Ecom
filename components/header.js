@@ -1,9 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import {
   useEffect,
   useRef,
-  useState,
+  useState
 } from 'react'
 import {
   Dialog,
@@ -311,10 +312,14 @@ export default function Header() {
                 <div
                   className="absolute inset-0 flex items-center justify-center h-full w-full px-4"
                 >
-                  <img
+                  <Image
                     className="bg-contain bg-center bg-no-repeat"
                     src="/images/hfrLogoTitle.png"
                     alt="Home"
+                    fill={false}
+                    width={200}
+                    height={60}
+                    priority
                   />
                 </div>
               </div>
@@ -484,10 +489,14 @@ export default function Header() {
             {/* Logo (lg+) */}
             <div title="Home" className="absolute top-1/2 -translate-y-1/2 lg:left-8 hidden lg:flex lg:items-center">
               <Link href="/">
-                <img
+                <Image
+                  className="h-8 w-auto"
                   alt="Hijauan Fauna Resources"
                   src="/images/hfrLogoTitle.png"
-                  className="h-8 w-auto"
+                  fill={false}
+                  width={200}
+                  height={60}
+                  priority
                 />
               </Link>
             </div>
@@ -561,10 +570,14 @@ export default function Header() {
 
             {/* Logo (lg-) */}
             <Link href="/" title="Home" className="absolute left-1/2 -translate-x-1/2 lg:hidden">
-              <img
+              <Image
                 alt="Hijauan Fauna Resources"
                 src="/images/hfrLogoTitle.png"
                 className="h-8 w-auto"
+                fill={false}
+                width={200}
+                height={60}
+                priority
               />
             </Link>
 
