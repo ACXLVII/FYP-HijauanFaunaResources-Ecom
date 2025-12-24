@@ -35,10 +35,10 @@ export default function ARPreviewButton({
     window.addEventListener('resize', checkMobile);
 
     // STEP 3: Load model-viewer only for non-iOS devices
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
-    document.head.appendChild(script);
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
+      document.head.appendChild(script);
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
