@@ -77,6 +77,11 @@ export async function POST(request) {
       payment_method_types: ['card'],
       line_items: normalizedItems,
       mode: 'payment',
+      
+      // Add discounts array with your coupon ID
+      discounts: [{
+        coupon: 'coupon_EOY2025', // Replace with your actual coupon ID
+      }],
 
       //LIVE MODE: Uncomment the line below to use the production URL
       // success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://fyp.hijauanfauna.com'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
