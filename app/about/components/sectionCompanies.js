@@ -23,13 +23,13 @@ export default function SectionCompanies() {
           <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto pt-4 lg:pt-6 pb-8 lg:pb-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 items-center justify-items-center">
               <div className="w-[300px] h-[300px] flex items-center justify-center">
-                <Image src="/images/about/companies/TNB.png" alt="Tenaga National Berhad" width={300} height={300} className="object-contain w-full h-full" unoptimized />
+                <Image src="/images/about/Companies/TNB.png" alt="Tenaga National Berhad" width={300} height={300} className="object-contain w-full h-full" />
               </div>
               <div className="w-[300px] h-[300px] flex items-center justify-center">
-                <Image src="/images/about/companies/EcoGrandeur.png" alt="Eco Grandeur" width={300} height={300} className="object-contain w-full h-full" unoptimized />
+                <Image src="/images/about/Companies/EcoGrandeur.png" alt="Eco Grandeur" width={300} height={300} className="object-contain w-full h-full" />
               </div>
               <div className="w-[300px] h-[300px] flex items-center justify-center">
-                <Image src="/images/about/companies/IramaPerdana.png" alt="Irama Perdana" width={300} height={300} className="object-contain w-full h-full" unoptimized />
+                <Image src="/images/about/Companies/IramaPerdana.png" alt="Irama Perdana" width={300} height={300} className="object-contain w-full h-full" />
               </div>
             </div>
           </div>
