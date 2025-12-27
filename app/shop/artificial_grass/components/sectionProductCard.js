@@ -162,7 +162,7 @@ export default function ProductCard({ product }) {
 
         {/* Pricing */}
         <div className="overflow-hidden mb-4 lg:mb-8 rounded-lg lg:rounded-xl border border-[#C39533]">
-          <div className={`grid ${product.priceGroup?.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+          <div className={`grid ${product.priceGroup?.length === 2 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-1"}`}>
             {product.priceGroup?.[0] && (
               <div className="flex flex-col items-center justify-center p-2 lg:p-4">
                 {IconMap[product.priceGroup[0].icon] && (
@@ -177,7 +177,7 @@ export default function ProductCard({ product }) {
               </div>
             )}
             {product.priceGroup?.[1] && (
-              <div className="flex flex-col items-center justify-center p-2 lg:p-4 border-l border-[#C39533]">
+              <div className="flex flex-col items-center justify-center p-2 lg:p-4 border-t lg:border-t-0 border-l-0 lg:border-l border-[#C39533]">
                 {IconMap[product.priceGroup[1].icon] && (
                   React.createElement(IconMap[product.priceGroup[1].icon], { className: "size-8 lg:size-12 mb-2 lg:mb-4 text-[#C39533]" })
                 )}
@@ -214,13 +214,13 @@ export default function ProductCard({ product }) {
           
           return (
             <ARPreviewMultiPlacement
-              className="w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
+              className="lg:hidden w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
               modelSrc={arPaths.modelSrc}
               iosSrc={arPaths.iosSrc}
               arPlacement="floor"
             >
               <div className="flex items-center justify-center gap-2 lg:gap-4">
-                <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]"/>
                 <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
                   Preview in AR
                 </h1>

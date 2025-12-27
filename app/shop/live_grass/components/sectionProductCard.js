@@ -248,7 +248,7 @@ export default function ProductCard({ product }) {
           
           return (
             <ARPreviewMultiPlacement
-              className="w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
+              className="lg:hidden w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
               modelSrc={arPaths.modelSrc}
               iosSrc={arPaths.iosSrc}
               arPlacement="floor"
