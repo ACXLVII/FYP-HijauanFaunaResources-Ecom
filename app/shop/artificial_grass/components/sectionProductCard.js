@@ -65,17 +65,6 @@ const IconMap = {
 };
 
 export default function ProductCard({ product }) {
-  const [isIOS, setIsIOS] = React.useState(false);
-
-  React.useEffect(() => {
-    // Detect iOS devices
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const platform = window.navigator.platform.toLowerCase();
-    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || 
-                       (platform === 'macintel' && navigator.maxTouchPoints > 1);
-    setIsIOS(isIOSDevice);
-  }, []);
-  
   // Helper function to get AR model paths for artificial grass based on product name/id
   const getARModelPaths = (productName, productId) => {
     // Extract thickness from name or id (e.g., "15mm", "25mm", "30mm", "35mm", "40mm")
@@ -87,7 +76,8 @@ export default function ProductCard({ product }) {
     if (thicknessMatch) {
       const thickness = thicknessMatch[1];
       return {
-        modelSrc: `/models/artificial_grass/${thickness}mm.glb`
+        modelSrc: `/models/artificial_grass/${thickness}mm.glb`,
+        iosSrc: `/models/artificial_grass/${thickness}mm.usdz`
       };
     }
     
@@ -217,7 +207,7 @@ export default function ProductCard({ product }) {
         </button>
 
         {/* AR Preview Button */}
-        {!isIOS && (() => {
+        {(() => {
           const arPaths = getARModelPaths(product.name, product.id || product.doc_id);
           if (!arPaths) return null;
           
@@ -225,6 +215,7 @@ export default function ProductCard({ product }) {
             <ARPreviewMultiPlacement
               className="lg:hidden w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
               modelSrc={arPaths.modelSrc}
+              iosSrc={arPaths.iosSrc}
               arPlacement="floor"
             >
               <div className="flex items-center justify-center gap-2 lg:gap-4">

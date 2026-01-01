@@ -4,19 +4,21 @@ import React, { useEffect, useState, useRef } from 'react';
 
 /**
  * Enhanced AR Preview with Multi-Placement
- * - Tap screen to add multiple grass instances
- * - Uses WebXR with Three.js for true multi-placement support
- * - Works on Android devices with WebXR support
+ * - iOS: Simple Quick Look AR (single placement) using USDZ files
+ * - Android: Tap screen to add multiple grass instances using WebXR with Three.js
+ * - Works on both iOS and Android devices
  */
 export default function ARPreviewMultiPlacement({
   children,
   modelSrc,
+  iosSrc,
   arPlacement = 'floor',
   className = '',
 }) {
   
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [webXRSupported, setWebXRSupported] = useState(false);
   const arContainerRef = useRef(null);
@@ -27,7 +29,14 @@ export default function ARPreviewMultiPlacement({
     
     setIsClient(true);
     
-    // STEP 2: Detect mobile devices
+    // STEP 2: Detect iOS devices
+    const userAgentCheck = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const iPadOSCheck = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    const vendorCheck = /iPad|iPhone|iPod/.test(navigator.vendor);
+    const isIOSDevice = userAgentCheck || iPadOSCheck || vendorCheck;
+    setIsIOS(isIOSDevice);
+    
+    // STEP 3: Detect mobile devices
     const checkMobile = () => {
       const isMobileDevice = window.innerWidth <= 1024 || 
                              /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -36,8 +45,8 @@ export default function ARPreviewMultiPlacement({
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // STEP 3: Check WebXR support
-    if (navigator.xr) {
+    // STEP 4: Check WebXR support (only for non-iOS devices)
+    if (!isIOSDevice && navigator.xr) {
       navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
         setWebXRSupported(supported);
       }).catch(() => {
@@ -47,27 +56,29 @@ export default function ARPreviewMultiPlacement({
       setWebXRSupported(false);
     }
 
-    // STEP 4: Load Three.js and model-viewer
-    // Load Three.js for WebXR multi-placement
-    if (!window.THREE) {
-      const threeScript = document.createElement('script');
-      threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-      document.head.appendChild(threeScript);
+    // STEP 5: Load Three.js and model-viewer (only for non-iOS devices)
+    if (!isIOSDevice) {
+      // Load Three.js for WebXR multi-placement
+      if (!window.THREE) {
+        const threeScript = document.createElement('script');
+        threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        document.head.appendChild(threeScript);
+        
+        // Load GLTFLoader
+        const gltfScript = document.createElement('script');
+        gltfScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+        gltfScript.onload = () => {
+          // GLTFLoader is now available
+        };
+        document.head.appendChild(gltfScript);
+      }
       
-      // Load GLTFLoader
-      const gltfScript = document.createElement('script');
-      gltfScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
-      gltfScript.onload = () => {
-        // GLTFLoader is now available
-      };
-      document.head.appendChild(gltfScript);
+      // Load model-viewer as fallback
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
+      document.head.appendChild(script);
     }
-    
-    // Load model-viewer as fallback
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
-    document.head.appendChild(script);
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -80,7 +91,30 @@ export default function ARPreviewMultiPlacement({
   const handleStartAR = async () => {
     setShowInstructions(false);
 
-    // Use WebXR with Three.js for multi-placement
+    // STEP 1: Handle iOS AR with Quick Look (simple single placement)
+    if (isIOS && iosSrc) {
+      // Create anchor element for Quick Look
+      const arAnchor = document.createElement('a');
+      arAnchor.rel = 'ar';
+      arAnchor.href = iosSrc;
+      
+      // Append to body
+      document.body.appendChild(arAnchor);
+      
+      // Trigger click to open Quick Look
+      arAnchor.click();
+      
+      // Cleanup after a short delay
+      setTimeout(() => {
+        if (document.body.contains(arAnchor)) {
+          document.body.removeChild(arAnchor);
+        }
+      }, 100);
+      
+      return;
+    }
+
+    // STEP 2: Handle Android/Web AR with WebXR multi-placement
     if (webXRSupported && window.THREE) {
       await startWebXRAR();
     } else {
@@ -327,48 +361,73 @@ export default function ARPreviewMultiPlacement({
 
             {/* Title */}
             <h2 className="text-2xl font-bold text-center mb-3 text-gray-800">
-              AR Multi-Placement
+              {isIOS ? 'AR Preview' : 'AR Multi-Placement'}
             </h2>
 
             {/* Instructions */}
             <div className="space-y-3 mb-6">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                <p className="text-gray-700 text-sm pt-0.5">
-                  Point your camera at a flat surface (floor)
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                <p className="text-gray-700 text-sm pt-0.5">
-                  Tap to place your first grass patch
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                <p className="text-gray-700 text-sm pt-0.5">
-                  <strong>Keep tapping to add more grass patches!</strong>
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
-                <p className="text-gray-700 text-sm pt-0.5">
-                  Each tap adds a new grass instance at that location
-                </p>
-              </div>
-              {!webXRSupported && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
-                  <p className="text-xs text-yellow-800">
-                    <strong>Note:</strong> WebXR not detected. Using fallback mode (may have limited multi-placement).
-                  </p>
-                </div>
-              )}
-              {webXRSupported && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
-                  <p className="text-xs text-green-800">
-                    <strong>WebXR Enabled:</strong> Full multi-placement support! Tap anywhere to add more grass.
-                  </p>
-                </div>
+              {isIOS ? (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Point your camera at a flat surface (floor)
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Tap to place the grass model
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Move your device to view from different angles
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Point your camera at a flat surface (floor)
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Tap to place your first grass patch
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      <strong>Keep tapping to add more grass patches!</strong>
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Each tap adds a new grass instance at that location
+                    </p>
+                  </div>
+                  {!webXRSupported && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-yellow-800">
+                        <strong>Note:</strong> WebXR not detected. Using fallback mode (may have limited multi-placement).
+                      </p>
+                    </div>
+                  )}
+                  {webXRSupported && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-green-800">
+                        <strong>WebXR Enabled:</strong> Full multi-placement support! Tap anywhere to add more grass.
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

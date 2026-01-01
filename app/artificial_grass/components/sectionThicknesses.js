@@ -84,17 +84,6 @@ function ImageSlideshow({ images }) {
 }
 
 export default function SectionThickness() {
-  const [isIOS, setIsIOS] = React.useState(false);
-
-  React.useEffect(() => {
-    // Detect iOS devices
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const platform = window.navigator.platform.toLowerCase();
-    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || 
-                       (platform === 'macintel' && navigator.maxTouchPoints > 1);
-    setIsIOS(isIOSDevice);
-  }, []);
-
   return (
     <div className="bg-[#FFFFFF]">
       <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto pt-16 lg:pt-32 pb-8 lg:pb-16">
@@ -137,20 +126,19 @@ export default function SectionThickness() {
                 
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
-                  {!isIOS && (
-                    <ARPreviewMultiPlacement
-                      className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                      modelSrc="/models/artificial_grass/15mm.glb"
-                      arPlacement="floor"
-                    >
-                      <div className="flex items-center justify-center gap-2 lg:gap-4">
-                        <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
-                        <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                          Preview in AR
-                        </h1>
-                      </div>
-                    </ARPreviewMultiPlacement>
-                  )}
+                  <ARPreviewMultiPlacement
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/15mm.glb"
+                    iosSrc="/models/artificial_grass/15mm.usdz"
+                    arPlacement="floor"
+                  >
+                    <div className="flex items-center justify-center gap-2 lg:gap-4">
+                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                        Preview in AR
+                      </h1>
+                    </div>
+                  </ARPreviewMultiPlacement>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -199,20 +187,19 @@ export default function SectionThickness() {
                 
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
-                  {!isIOS && (
-                    <ARPreviewMultiPlacement
-                      className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                      modelSrc="/models/artificial_grass/25mm.glb"
-                      arPlacement="floor"
-                    >
-                      <div className="flex items-center justify-center gap-2 lg:gap-4">
-                        <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
-                        <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                          Preview in AR
-                        </h1>
-                      </div>
-                    </ARPreviewMultiPlacement>
-                  )}
+                  <ARPreviewMultiPlacement
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/25mm.glb"
+                    iosSrc="/models/artificial_grass/25mm.usdz"
+                    arPlacement="floor"
+                  >
+                    <div className="flex items-center justify-center gap-2 lg:gap-4">
+                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                        Preview in AR
+                      </h1>
+                    </div>
+                  </ARPreviewMultiPlacement>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -261,20 +248,19 @@ export default function SectionThickness() {
                 
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
-                  {!isIOS && (
-                    <ARPreviewMultiPlacement
-                      className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                      modelSrc="/models/artificial_grass/30mm.glb"
-                      arPlacement="floor"
-                    >
-                      <div className="flex items-center justify-center gap-2 lg:gap-4">
-                        <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
-                        <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                          Preview in AR
-                        </h1>
-                      </div>
-                    </ARPreviewMultiPlacement>
-                  )}
+                  <ARPreviewMultiPlacement
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/30mm.glb"
+                    iosSrc="/models/artificial_grass/30mm.usdz"
+                    arPlacement="floor"
+                  >
+                    <div className="flex items-center justify-center gap-2 lg:gap-4">
+                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                        Preview in AR
+                      </h1>
+                    </div>
+                  </ARPreviewMultiPlacement>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -323,20 +309,19 @@ export default function SectionThickness() {
                 
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
-                  {!isIOS && (
-                    <ARPreviewMultiPlacement
-                      className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                      modelSrc="/models/artificial_grass/35mm.glb"
-                      arPlacement="floor"
-                    >
-                      <div className="flex items-center justify-center gap-2 lg:gap-4">
-                        <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
-                        <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                          Preview in AR
-                        </h1>
-                      </div>
-                    </ARPreviewMultiPlacement>
-                  )}
+                  <ARPreviewMultiPlacement
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/35mm.glb"
+                    iosSrc="/models/artificial_grass/35mm.usdz"
+                    arPlacement="floor"
+                  >
+                    <div className="flex items-center justify-center gap-2 lg:gap-4">
+                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                        Preview in AR
+                      </h1>
+                    </div>
+                  </ARPreviewMultiPlacement>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}
@@ -385,20 +370,19 @@ export default function SectionThickness() {
                 
                {/* Button Grid */}
                <div className="grid grid-cols-1 gap-3 lg:gap-4">
-                  {!isIOS && (
-                    <ARPreviewMultiPlacement
-                      className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
-                      modelSrc="/models/artificial_grass/40mm.glb"
-                      arPlacement="floor"
-                    >
-                      <div className="flex items-center justify-center gap-2 lg:gap-4">
-                        <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
-                        <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                          Preview in AR
-                        </h1>
-                      </div>
-                    </ARPreviewMultiPlacement>
-                  )}
+                  <ARPreviewMultiPlacement
+                    className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                    modelSrc="/models/artificial_grass/40mm.glb"
+                    iosSrc="/models/artificial_grass/40mm.usdz"
+                    arPlacement="floor"
+                  >
+                    <div className="flex items-center justify-center gap-2 lg:gap-4">
+                      <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                      <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                        Preview in AR
+                      </h1>
+                    </div>
+                  </ARPreviewMultiPlacement>
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/artificial_grass'}

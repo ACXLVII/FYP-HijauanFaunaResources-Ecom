@@ -55,17 +55,6 @@ const IconMap = {
 };
 
 export default function ProductCard({ product }) {
-  const [isIOS, setIsIOS] = React.useState(false);
-
-  React.useEffect(() => {
-    // Detect iOS devices
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const platform = window.navigator.platform.toLowerCase();
-    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || 
-                       (platform === 'macintel' && navigator.maxTouchPoints > 1);
-    setIsIOS(isIOSDevice);
-  }, []);
-
   // Helper function to get AR model paths for live grass based on product name
   const getARModelPaths = (productName) => {
     const nameLower = (productName || '').toLowerCase();
@@ -73,19 +62,23 @@ export default function ProductCard({ product }) {
     // Map product names to model paths
     if (nameLower.includes('japanese')) {
       return {
-        modelSrc: '/models/live_grass/japanese.glb'
+        modelSrc: '/models/live_grass/japanese.glb',
+        iosSrc: '/models/live_grass/japanese.usdz'
       };
     } else if (nameLower.includes('philippine')) {
       return {
-        modelSrc: '/models/live_grass/philippine.glb'
+        modelSrc: '/models/live_grass/philippine.glb',
+        iosSrc: '/models/live_grass/philippine.usdz'
       };
     } else if (nameLower.includes('pearl')) {
       return {
-        modelSrc: '/models/live_grass/pearl.glb'
+        modelSrc: '/models/live_grass/pearl.glb',
+        iosSrc: '/models/live_grass/pearl.usdz'
       };
     } else if (nameLower.includes('cow')) {
       return {
-        modelSrc: '/models/live_grass/cow.glb'
+        modelSrc: '/models/live_grass/cow.glb',
+        iosSrc: '/models/live_grass/cow.usdz'
       };
     }
     
@@ -249,7 +242,7 @@ export default function ProductCard({ product }) {
         </button>
 
         {/* AR Preview Button */}
-        {!isIOS && (() => {
+        {(() => {
           const arPaths = getARModelPaths(product.name);
           if (!arPaths) return null;
           
@@ -257,6 +250,7 @@ export default function ProductCard({ product }) {
             <ARPreviewMultiPlacement
               className="lg:hidden w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
               modelSrc={arPaths.modelSrc}
+              iosSrc={arPaths.iosSrc}
               arPlacement="floor"
             >
               <div className="flex items-center justify-center gap-2 lg:gap-4">
