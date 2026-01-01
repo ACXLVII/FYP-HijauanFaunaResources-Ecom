@@ -1,25 +1,25 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 /**
  * Enhanced AR Preview with Multi-Placement
  * - Tap screen to add multiple grass instances
- * - iOS: Uses Quick Look (single placement only - iOS limitation)
- * - Android: Uses Scene Viewer with "Add" button functionality
+ * - Uses WebXR with Three.js for true multi-placement support
+ * - Works on Android devices with WebXR support
  */
 export default function ARPreviewMultiPlacement({
   children,
   modelSrc,
-  iosSrc,
   arPlacement = 'floor',
   className = '',
 }) {
   
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [webXRSupported, setWebXRSupported] = useState(false);
+  const arContainerRef = useRef(null);
 
   // STEP 1: Initialize client-side detection
   useEffect(() => {
@@ -36,7 +36,34 @@ export default function ARPreviewMultiPlacement({
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // STEP 3: Load model-viewer for all devices (will be used for Android)
+    // STEP 3: Check WebXR support
+    if (navigator.xr) {
+      navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+        setWebXRSupported(supported);
+      }).catch(() => {
+        setWebXRSupported(false);
+      });
+    } else {
+      setWebXRSupported(false);
+    }
+
+    // STEP 4: Load Three.js and model-viewer
+    // Load Three.js for WebXR multi-placement
+    if (!window.THREE) {
+      const threeScript = document.createElement('script');
+      threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      document.head.appendChild(threeScript);
+      
+      // Load GLTFLoader
+      const gltfScript = document.createElement('script');
+      gltfScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+      gltfScript.onload = () => {
+        // GLTFLoader is now available
+      };
+      document.head.appendChild(gltfScript);
+    }
+    
+    // Load model-viewer as fallback
     const script = document.createElement('script');
     script.type = 'module';
     script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
@@ -45,55 +72,188 @@ export default function ARPreviewMultiPlacement({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // STEP 4: Detect iOS devices (separate effect for clarity)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    // Method 1: Check user agent for iPhone/iPad/iPod
-    const userAgentCheck = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    
-    // Method 2: Check for iPadOS 13+ (identifies as MacIntel with touch)
-    const iPadOSCheck = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    
-    // Method 3: Check for iOS in vendor
-    const vendorCheck = /iPad|iPhone|iPod/.test(navigator.vendor);
-    
-    // Set iOS if any check passes
-    setIsIOS(userAgentCheck || iPadOSCheck || vendorCheck);
-  }, []);
-
   const handleClick = () => {
     if (!isClient || !isMobile) return;
     setShowInstructions(true);
   };
 
-  const handleStartAR = () => {
+  const handleStartAR = async () => {
     setShowInstructions(false);
 
-    // STEP 5: Handle iOS AR with Quick Look
-    if (isIOS && iosSrc) {
-      // Create anchor element for Quick Look
-      const arAnchor = document.createElement('a');
-      arAnchor.rel = 'ar';
-      arAnchor.href = iosSrc;
-      
-      // Append to body
-      document.body.appendChild(arAnchor);
-      
-      // Trigger click to open Quick Look
-      arAnchor.click();
-      
-      // Cleanup after a short delay
-      setTimeout(() => {
-        if (document.body.contains(arAnchor)) {
-          document.body.removeChild(arAnchor);
-        }
-      }, 100);
-      
-      return;
+    // Use WebXR with Three.js for multi-placement
+    if (webXRSupported && window.THREE) {
+      await startWebXRAR();
+    } else {
+      // Fallback to model-viewer (single placement only)
+      startModelViewerAR();
     }
+  };
 
-    // Android: Use model-viewer with enhanced features
+  const startWebXRAR = async () => {
+    // Custom Three.js + WebXR implementation for true multi-placement
+    try {
+      // Wait for Three.js to load if needed
+      if (!window.THREE) {
+        await new Promise((resolve) => {
+          const checkThree = setInterval(() => {
+            if (window.THREE) {
+              clearInterval(checkThree);
+              resolve();
+            }
+          }, 100);
+          setTimeout(() => {
+            clearInterval(checkThree);
+            if (!window.THREE) {
+              startModelViewerAR();
+              return;
+            }
+            resolve();
+          }, 5000);
+        });
+      }
+
+      if (!window.THREE) {
+        startModelViewerAR();
+        return;
+      }
+
+      const THREE = window.THREE;
+      
+      // Create AR container
+      const container = document.createElement('div');
+      container.id = 'ar-webxr-container';
+      container.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent;';
+      document.body.appendChild(container);
+      arContainerRef.current = container;
+
+      // Create scene
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+      const renderer = new THREE.WebGLRenderer({ 
+        alpha: true, 
+        antialias: true,
+        xr: true 
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.xr.enabled = true;
+      container.appendChild(renderer.domElement);
+
+      // Store grass instances
+      const grassInstances = [];
+      let grassModel = null;
+
+      // Load grass model
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        modelSrc,
+        (gltf) => {
+          grassModel = gltf.scene;
+          
+          // Function to add grass at hit point
+          const addGrassAtPoint = (point) => {
+            if (!grassModel) return;
+            const instance = grassModel.clone();
+            instance.position.set(point.x, point.y || 0, point.z);
+            scene.add(instance);
+            grassInstances.push(instance);
+          };
+
+          // Request AR session
+          navigator.xr.requestSession('immersive-ar', {
+            requiredFeatures: ['local-floor'],
+            optionalFeatures: ['bounded-floor', 'hit-test']
+          }).then(async (session) => {
+            renderer.xr.setSession(session);
+
+            // Get reference space first
+            const viewerSpace = await session.requestReferenceSpace('local-floor');
+            let hitTestSource = null;
+            
+            try {
+              // Create hit test source for floor detection
+              const hitTestSourceInit = { space: viewerSpace };
+              hitTestSource = await session.requestHitTestSource(hitTestSourceInit);
+            } catch (e) {
+              console.warn('Hit test not available, using fallback');
+            }
+            
+            // Store last tap position for hit testing
+            let pendingTap = null;
+            
+            // Handle taps/clicks to add grass
+            const onSelect = () => {
+              pendingTap = true;
+            };
+
+            // Add controller for selection
+            const controller = renderer.xr.getController(0);
+            controller.addEventListener('select', onSelect);
+            scene.add(controller);
+
+            // Handle screen taps for mobile
+            container.addEventListener('touchstart', (event) => {
+              event.preventDefault();
+              pendingTap = true;
+            });
+
+            // Animation loop with hit testing
+            renderer.setAnimationLoop((time, frame) => {
+              if (frame && hitTestSource && pendingTap) {
+                try {
+                  const hitTestResults = frame.getHitTestResults(hitTestSource);
+                  if (hitTestResults.length > 0) {
+                    const hit = hitTestResults[0];
+                    const pose = hit.getPose(viewerSpace);
+                    if (pose) {
+                      const position = pose.transform.position;
+                      addGrassAtPoint({ x: position.x, y: position.y, z: position.z });
+                    }
+                  } else {
+                    // Fallback: add at center if no hit test
+                    addGrassAtPoint({ x: 0, y: 0, z: 0 });
+                  }
+                  pendingTap = false;
+                } catch (e) {
+                  // Hit test failed, use fallback
+                  if (pendingTap) {
+                    addGrassAtPoint({ x: 0, y: 0, z: 0 });
+                    pendingTap = false;
+                  }
+                }
+              }
+              renderer.render(scene, camera);
+            });
+
+            session.addEventListener('end', () => {
+              renderer.setAnimationLoop(null);
+              if (container.parentNode) {
+                container.parentNode.removeChild(container);
+              }
+              grassInstances.forEach(instance => scene.remove(instance));
+              grassInstances.length = 0;
+            });
+          }).catch((error) => {
+            console.error('WebXR session failed:', error);
+            container.remove();
+            startModelViewerAR();
+          });
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading model:', error);
+          container.remove();
+          startModelViewerAR();
+        }
+      );
+    } catch (error) {
+      console.error('WebXR AR setup failed:', error);
+      startModelViewerAR();
+    }
+  };
+
+  const startModelViewerAR = () => {
+    // Use model-viewer with WebXR priority for better AR experience
     const existingViewer = document.querySelector('#temp-ar-viewer');
     if (existingViewer) {
       existingViewer.remove();
@@ -103,23 +263,22 @@ export default function ARPreviewMultiPlacement({
     viewer.id = 'temp-ar-viewer';
     viewer.setAttribute('src', modelSrc);
     viewer.setAttribute('ar', '');
-    viewer.setAttribute('ar-modes', 'scene-viewer');
+    // Prioritize WebXR for better multi-placement potential, fallback to scene-viewer
+    viewer.setAttribute('ar-modes', 'webxr scene-viewer');
     viewer.setAttribute('ar-placement', arPlacement);
-    
-    // Enable multi-placement features
     viewer.setAttribute('ar-scale', 'auto');
     
     viewer.style.cssText = 'position: fixed; width: 1px; height: 1px; top: -9999px; left: -9999px; opacity: 0; pointer-events: none;';
     
     document.body.appendChild(viewer);
 
-    // Wait for model-viewer to load, then activate AR
     setTimeout(() => {
       if (viewer.activateAR) {
-        viewer.activateAR();
+        viewer.activateAR().catch(() => {
+          viewer.remove();
+        });
       }
       
-      // Cleanup after 30 seconds
       setTimeout(() => {
         if (document.body.contains(viewer)) {
           viewer.remove();
@@ -173,64 +332,43 @@ export default function ARPreviewMultiPlacement({
 
             {/* Instructions */}
             <div className="space-y-3 mb-6">
-              {isIOS ? (
-                <>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Point your camera at a flat surface
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Tap to place the grass patch
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Use pinch gestures to resize
-                    </p>
-                  </div>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
-                    <p className="text-xs text-yellow-800">
-                      <strong>iOS Note:</strong> Quick Look supports single placement. For multiple patches, exit and reopen AR.
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Point your camera at a flat surface
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Tap to place your first grass patch
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      <strong>Tap empty areas to add more grass!</strong>
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Pinch to resize and drag to move each patch
-                    </p>
-                  </div>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
-                    <p className="text-xs text-green-800">
-                      <strong>Pro Tip:</strong> Create your perfect lawn by placing multiple grass patches!
-                    </p>
-                  </div>
-                </>
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                <p className="text-gray-700 text-sm pt-0.5">
+                  Point your camera at a flat surface (floor)
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                <p className="text-gray-700 text-sm pt-0.5">
+                  Tap to place your first grass patch
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                <p className="text-gray-700 text-sm pt-0.5">
+                  <strong>Keep tapping to add more grass patches!</strong>
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                <p className="text-gray-700 text-sm pt-0.5">
+                  Each tap adds a new grass instance at that location
+                </p>
+              </div>
+              {!webXRSupported && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
+                  <p className="text-xs text-yellow-800">
+                    <strong>Note:</strong> WebXR not detected. Using fallback mode (may have limited multi-placement).
+                  </p>
+                </div>
+              )}
+              {webXRSupported && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+                  <p className="text-xs text-green-800">
+                    <strong>WebXR Enabled:</strong> Full multi-placement support! Tap anywhere to add more grass.
+                  </p>
+                </div>
               )}
             </div>
 

@@ -2,8 +2,6 @@
 
 import React from 'react';
 import Image from 'next/image';
-import ARPreviewMultiPlacement from '@/app/arPreview/ARPreviewMultiPlacement';
-import { TbAugmentedReality2 } from 'react-icons/tb';
 
 // Icon Imports
 import {
@@ -65,26 +63,6 @@ const IconMap = {
 };
 
 export default function ProductCard({ product }) {
-  
-  // Helper function to get AR model paths for artificial grass based on product name/id
-  const getARModelPaths = (productName, productId) => {
-    // Extract thickness from name or id (e.g., "15mm", "25mm", "30mm", "35mm", "40mm")
-    const nameLower = (productName || '').toLowerCase();
-    const idLower = (productId || '').toLowerCase();
-    
-    // Check for thickness in name or id
-    const thicknessMatch = (nameLower + ' ' + idLower).match(/(\d+)mm/);
-    if (thicknessMatch) {
-      const thickness = thicknessMatch[1];
-      return {
-        modelSrc: `/models/artificial_grass/${thickness}mm.glb`,
-        iosSrc: `/models/artificial_grass/${thickness}mm.usdz`
-      };
-    }
-    
-    // Default fallback
-    return null;
-  };
   
   // Helper function to convert base64 string to data URI (matching live_grass pattern)
   const getImageSrc = (imageData) => {
@@ -206,28 +184,6 @@ export default function ProductCard({ product }) {
             {product.inStock ? 'Select' : 'Out of Stock'}
           </h1>
         </button>
-
-        {/* AR Preview Button */}
-        {(() => {
-          const arPaths = getARModelPaths(product.name, product.id || product.doc_id);
-          if (!arPaths) return null;
-          
-          return (
-            <ARPreviewMultiPlacement
-              className="lg:hidden w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
-              modelSrc={arPaths.modelSrc}
-              iosSrc={arPaths.iosSrc}
-              arPlacement="floor"
-            >
-              <div className="flex items-center justify-center gap-2 lg:gap-4">
-                <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]"/>
-                <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                  Preview in AR
-                </h1>
-              </div>
-            </ARPreviewMultiPlacement>
-          );
-        })()}
 
       </div>
       {/* Product Details ENDS */}
