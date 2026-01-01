@@ -1,6 +1,8 @@
 'use client';
 
 import React from "react";
+import ARPreviewMultiPlacement from '@/app/arPreview/ARPreviewMultiPlacement';
+import { TbAugmentedReality2 } from 'react-icons/tb';
 
 // Icon Imports
 import {
@@ -53,6 +55,43 @@ const IconMap = {
 };
 
 export default function ProductCard({ product }) {
+  const [isIOS, setIsIOS] = React.useState(false);
+
+  React.useEffect(() => {
+    // Detect iOS devices
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const platform = window.navigator.platform.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || 
+                       (platform === 'macintel' && navigator.maxTouchPoints > 1);
+    setIsIOS(isIOSDevice);
+  }, []);
+
+  // Helper function to get AR model paths for live grass based on product name
+  const getARModelPaths = (productName) => {
+    const nameLower = (productName || '').toLowerCase();
+    
+    // Map product names to model paths
+    if (nameLower.includes('japanese')) {
+      return {
+        modelSrc: '/models/live_grass/japanese.glb'
+      };
+    } else if (nameLower.includes('philippine')) {
+      return {
+        modelSrc: '/models/live_grass/philippine.glb'
+      };
+    } else if (nameLower.includes('pearl')) {
+      return {
+        modelSrc: '/models/live_grass/pearl.glb'
+      };
+    } else if (nameLower.includes('cow')) {
+      return {
+        modelSrc: '/models/live_grass/cow.glb'
+      };
+    }
+    
+    return null;
+  };
+  
   // Helper function to convert base64 string to data URI
   const getImageSrc = (imageData) => {
     if (!imageData) {
@@ -208,6 +247,27 @@ export default function ProductCard({ product }) {
             {product.inStock ? 'Select' : 'Out of Stock'}
           </h1>
         </button>
+
+        {/* AR Preview Button */}
+        {!isIOS && (() => {
+          const arPaths = getARModelPaths(product.name);
+          if (!arPaths) return null;
+          
+          return (
+            <ARPreviewMultiPlacement
+              className="lg:hidden w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
+              modelSrc={arPaths.modelSrc}
+              arPlacement="floor"
+            >
+              <div className="flex items-center justify-center gap-2 lg:gap-4">
+                <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                  Preview in AR
+                </h1>
+              </div>
+            </ARPreviewMultiPlacement>
+          );
+        })()}
 
       </div>
       {/* Product Details ENDS */}

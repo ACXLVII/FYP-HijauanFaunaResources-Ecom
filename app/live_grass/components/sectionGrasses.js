@@ -5,7 +5,8 @@ import Image from 'next/image';
 
 // Icon Imports
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
-import { TbGardenCart } from "react-icons/tb";
+import { TbAugmentedReality2, TbGardenCart } from "react-icons/tb";
+import ARPreviewMultiPlacement from '../../arPreview/ARPreviewMultiPlacement';
 
 // Function to display a slideshow of images with swipe functionality for mobile devices.
 function ImageSlideshow({ images }) {
@@ -83,6 +84,17 @@ function ImageSlideshow({ images }) {
 }
 
 export default function SectionGrasses() {
+  const [isIOS, setIsIOS] = React.useState(false);
+
+  React.useEffect(() => {
+    // Detect iOS devices
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const platform = window.navigator.platform.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || 
+                       (platform === 'macintel' && navigator.maxTouchPoints > 1);
+    setIsIOS(isIOSDevice);
+  }, []);
+
   return (
     <div className="bg-[#FFFFFF]">
       <div className="max-w-[90vw] lg:max-w-[80vw] mx-auto py-16 lg:py-32">
@@ -126,8 +138,22 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> homeowners, premium gardens, aesthetic lawn lovers.
                 </p>
                 
-                {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                  {/* Button Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                   {!isIOS && (
+                     <ARPreviewMultiPlacement
+                       className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                       modelSrc="/models/live_grass/japanese.glb"
+                       arPlacement="floor"
+                     >
+                       <div className="flex items-center justify-center gap-2 lg:gap-4">
+                         <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                         <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                           AR Preview
+                         </h1>
+                       </div>
+                     </ARPreviewMultiPlacement>
+                   )}
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/JapaneseGrass'}
@@ -176,8 +202,22 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> shaded lawns, family backyards, barefoot play zones.
                 </p>
                 
-                {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                  {/* Button Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                   {!isIOS && (
+                     <ARPreviewMultiPlacement
+                       className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                       modelSrc="/models/live_grass/philippine.glb"
+                       arPlacement="floor"
+                     >
+                       <div className="flex items-center justify-center gap-2 lg:gap-4">
+                         <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                         <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                           AR Preview
+                         </h1>
+                       </div>
+                     </ARPreviewMultiPlacement>
+                   )}
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/PhilipineGrass'}
@@ -226,8 +266,22 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> decorative landscaping, borders, garden beds.
                 </p>
                 
-                {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                  {/* Button Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                   {!isIOS && (
+                     <ARPreviewMultiPlacement
+                       className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                       modelSrc="/models/live_grass/pearl.glb"
+                       arPlacement="floor"
+                     >
+                       <div className="flex items-center justify-center gap-2 lg:gap-4">
+                         <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                         <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                           AR Preview
+                         </h1>
+                       </div>
+                     </ARPreviewMultiPlacement>
+                   )}
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/PearlGrass'}
@@ -276,8 +330,22 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> schools, open fields, budget-friendly lawn coverage.
                 </p>
                 
-                {/* Button Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                  {/* Button Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                   {!isIOS && (
+                     <ARPreviewMultiPlacement
+                       className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+                       modelSrc="/models/live_grass/cow.glb"
+                       arPlacement="floor"
+                     >
+                       <div className="flex items-center justify-center gap-2 lg:gap-4">
+                         <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                         <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                           AR Preview
+                         </h1>
+                       </div>
+                     </ARPreviewMultiPlacement>
+                   )}
                   <button
                     className="p-2 lg:p-3 bg-[#498118] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99"
                     onClick={() => window.location.href = '/shop/live_grass/product/CowGrass'}
