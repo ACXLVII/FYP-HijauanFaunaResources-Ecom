@@ -171,11 +171,16 @@ export default function ARPreviewMultiPlacement({
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.xr.enabled = true;
+      // Prefer floor-aligned tracking space for more accurate placement
+      if (renderer.xr.setReferenceSpaceType) {
+        renderer.xr.setReferenceSpaceType('local-floor');
+      }
       container.appendChild(renderer.domElement);
 
       // Store grass instances
       const grassInstances = [];
       let grassModel = null;
+      let baseYOffset = 0;
 
       // Load grass model
       const loader = new THREE.GLTFLoader();
@@ -183,12 +188,61 @@ export default function ARPreviewMultiPlacement({
         modelSrc,
         (gltf) => {
           grassModel = gltf.scene;
+
+          // Compute a Y offset so the model's "bottom" sits on the detected floor.
+          // Many grass models have their origin at the center, which makes them float.
+          try {
+            const bbox = new THREE.Box3().setFromObject(grassModel);
+            const minY = bbox.min?.y;
+            if (Number.isFinite(minY)) {
+              baseYOffset = -minY;
+            }
+          } catch {
+            baseYOffset = 0;
+          }
+
+          // Improve alpha-texture rendering stability (helps reduce the "turns into a square" artifact)
+          // Note: ultimate fix may still require adjusting the source textures (alpha padding / cutoff) in the 3D file.
+          grassModel.traverse((obj) => {
+            if (!obj || !obj.isMesh) return;
+            const mesh = obj;
+            mesh.frustumCulled = false;
+
+            const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            materials.forEach((mat) => {
+              if (!mat) return;
+              mat.side = THREE.DoubleSide;
+
+              // If the material uses transparency/alpha, prefer cutout-style rendering.
+              const usesAlpha = Boolean(mat.transparent || mat.alphaMap || mat.opacity < 1);
+              if (usesAlpha) {
+                mat.transparent = true;
+                mat.alphaTest = Math.max(mat.alphaTest || 0, 0.4);
+                mat.depthWrite = true;
+              }
+
+              if (mat.map) {
+                // Reduce mipmap-related alpha bleeding and keep details sharper while moving.
+                mat.map.generateMipmaps = false;
+                mat.map.minFilter = THREE.LinearFilter;
+                mat.map.magFilter = THREE.LinearFilter;
+
+                const maxAniso = renderer?.capabilities?.getMaxAnisotropy?.();
+                if (maxAniso) {
+                  mat.map.anisotropy = maxAniso;
+                }
+                mat.map.needsUpdate = true;
+              }
+
+              mat.needsUpdate = true;
+            });
+          });
           
           // Function to add grass at hit point
           const addGrassAtPoint = (point) => {
             if (!grassModel) return;
             const instance = grassModel.clone();
-            instance.position.set(point.x, point.y || 0, point.z);
+            instance.position.set(point.x, (point.y ?? 0) + baseYOffset, point.z);
             scene.add(instance);
             grassInstances.push(instance);
           };
@@ -200,8 +254,11 @@ export default function ARPreviewMultiPlacement({
           }).then(async (session) => {
             renderer.xr.setSession(session);
 
-            // Get reference space first
-            const viewerSpace = await session.requestReferenceSpace('local-floor');
+            // Reference spaces:
+            // - viewer: required for hit test source creation
+            // - local-floor: used to interpret hit pose in floor-aligned coordinates
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            const localFloorSpace = await session.requestReferenceSpace('local-floor');
             let hitTestSource = null;
             
             try {
@@ -238,22 +295,16 @@ export default function ARPreviewMultiPlacement({
                   const hitTestResults = frame.getHitTestResults(hitTestSource);
                   if (hitTestResults.length > 0) {
                     const hit = hitTestResults[0];
-                    const pose = hit.getPose(viewerSpace);
+                    const pose = hit.getPose(localFloorSpace);
                     if (pose) {
                       const position = pose.transform.position;
                       addGrassAtPoint({ x: position.x, y: position.y, z: position.z });
                     }
-                  } else {
-                    // Fallback: add at center if no hit test
-                    addGrassAtPoint({ x: 0, y: 0, z: 0 });
                   }
                   pendingTap = false;
                 } catch (e) {
-                  // Hit test failed, use fallback
-                  if (pendingTap) {
-                    addGrassAtPoint({ x: 0, y: 0, z: 0 });
-                    pendingTap = false;
-                  }
+                  // If hit test fails, don't place (prevents far-floating placements)
+                  pendingTap = false;
                 }
               }
               renderer.render(scene, camera);
