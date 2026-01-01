@@ -218,6 +218,10 @@ export default function ARPreviewMultiPlacement({
 
           updateDebug('Model loaded! Point at floor...');
 
+          // IMPORTANT: Rotate the base model to lay flat on floor
+          // If your grass model is exported "standing up", rotate it -90° on X axis
+          grassModel.rotation.x = -Math.PI / 2; // Rotate to lay flat
+
           // Compute a Y offset so the model's "bottom" sits on the detected floor.
           // Many grass models have their origin at the center, which makes them float.
           try {
@@ -271,7 +275,10 @@ export default function ARPreviewMultiPlacement({
           const addGrassAtPoint = (point) => {
             if (!grassModel) return;
             const instance = grassModel.clone();
+            
+            // Position on floor (rotation already applied to base model)
             instance.position.set(point.x, (point.y ?? 0) + baseYOffset, point.z);
+            
             scene.add(instance);
             grassInstances.push(instance);
             updateDebug(`Placed ${grassInstances.length} grass patch${grassInstances.length > 1 ? 'es' : ''}! Tap to add more.`);
