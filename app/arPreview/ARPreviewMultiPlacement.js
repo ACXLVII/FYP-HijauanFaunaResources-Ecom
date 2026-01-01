@@ -96,7 +96,11 @@ export default function ARPreviewMultiPlacement({
       // Create anchor element for Quick Look
       const arAnchor = document.createElement('a');
       arAnchor.rel = 'ar';
-      arAnchor.href = iosSrc;
+      
+      // Add Quick Look parameters for better behavior
+      const iosUrl = new URL(iosSrc, window.location.origin);
+      iosUrl.hash = 'allowsContentScaling=0'; // Disable automatic scaling
+      arAnchor.href = iosUrl.href;
       
       // Append to body
       document.body.appendChild(arAnchor);
@@ -160,6 +164,29 @@ export default function ARPreviewMultiPlacement({
       document.body.appendChild(container);
       arContainerRef.current = container;
 
+      // Add debug overlay
+      const debugOverlay = document.createElement('div');
+      debugOverlay.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 14px;
+        z-index: 10000;
+        pointer-events: none;
+      `;
+      debugOverlay.textContent = 'WebXR AR Starting...';
+      container.appendChild(debugOverlay);
+
+      const updateDebug = (msg) => {
+        if (debugOverlay) debugOverlay.textContent = msg;
+      };
+
       // Create scene
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
@@ -188,6 +215,8 @@ export default function ARPreviewMultiPlacement({
         modelSrc,
         (gltf) => {
           grassModel = gltf.scene;
+
+          updateDebug('Model loaded! Point at floor...');
 
           // Compute a Y offset so the model's "bottom" sits on the detected floor.
           // Many grass models have their origin at the center, which makes them float.
@@ -245,68 +274,100 @@ export default function ARPreviewMultiPlacement({
             instance.position.set(point.x, (point.y ?? 0) + baseYOffset, point.z);
             scene.add(instance);
             grassInstances.push(instance);
+            updateDebug(`Placed ${grassInstances.length} grass patch${grassInstances.length > 1 ? 'es' : ''}! Tap to add more.`);
           };
 
           // Request AR session
           navigator.xr.requestSession('immersive-ar', {
-            requiredFeatures: ['local-floor'],
-            optionalFeatures: ['bounded-floor', 'hit-test']
+            requiredFeatures: ['hit-test'],
+            optionalFeatures: ['dom-overlay', 'local-floor'],
+            domOverlay: container ? { root: container } : undefined
           }).then(async (session) => {
             renderer.xr.setSession(session);
 
-            // Reference spaces:
-            // - viewer: required for hit test source creation
-            // - local-floor: used to interpret hit pose in floor-aligned coordinates
-            const viewerSpace = await session.requestReferenceSpace('viewer');
+            // Reference spaces
             const localFloorSpace = await session.requestReferenceSpace('local-floor');
-            let hitTestSource = null;
             
-            try {
-              // Create hit test source for floor detection
-              const hitTestSourceInit = { space: viewerSpace };
-              hitTestSource = await session.requestHitTestSource(hitTestSourceInit);
-            } catch (e) {
-              console.warn('Hit test not available, using fallback');
-            }
+            // Use transient hit test for tap-based placement
+            let xrHitTestSource = null;
             
-            // Store last tap position for hit testing
-            let pendingTap = null;
-            
-            // Handle taps/clicks to add grass
-            const onSelect = () => {
-              pendingTap = true;
-            };
-
-            // Add controller for selection
-            const controller = renderer.xr.getController(0);
-            controller.addEventListener('select', onSelect);
-            scene.add(controller);
-
-            // Handle screen taps for mobile
-            container.addEventListener('touchstart', (event) => {
-              event.preventDefault();
-              pendingTap = true;
+            // Request hit test source for transient input (taps)
+            session.requestHitTestSourceForTransientInput({ 
+              profile: 'generic-touchscreen' 
+            }).then((hitTestSource) => {
+              xrHitTestSource = hitTestSource;
+              updateDebug('Tap screen to place grass!');
+            }).catch((err) => {
+              console.warn('Transient hit test not available, using fallback');
+              updateDebug('Hit test unavailable - tap may not work');
             });
 
-            // Animation loop with hit testing
-            renderer.setAnimationLoop((time, frame) => {
-              if (frame && hitTestSource && pendingTap) {
-                try {
-                  const hitTestResults = frame.getHitTestResults(hitTestSource);
-                  if (hitTestResults.length > 0) {
-                    const hit = hitTestResults[0];
-                    const pose = hit.getPose(localFloorSpace);
-                    if (pose) {
-                      const position = pose.transform.position;
-                      addGrassAtPoint({ x: position.x, y: position.y, z: position.z });
-                    }
-                  }
-                  pendingTap = false;
-                } catch (e) {
-                  // If hit test fails, don't place (prevents far-floating placements)
-                  pendingTap = false;
+            // Add visual feedback reticle
+            const reticle = new THREE.Mesh(
+              new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
+              new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
+            );
+            reticle.matrixAutoUpdate = false;
+            reticle.visible = false;
+            scene.add(reticle);
+
+            // Track if we already placed grass for current tap
+            let lastPlacementTime = 0;
+            const placementCooldown = 300; // ms between placements
+
+            // Handle controller selection
+            const controller = renderer.xr.getController(0);
+            controller.addEventListener('select', () => {
+              if (reticle.visible) {
+                const now = Date.now();
+                if (now - lastPlacementTime > placementCooldown) {
+                  const pos = new THREE.Vector3();
+                  pos.setFromMatrixPosition(reticle.matrix);
+                  addGrassAtPoint({ x: pos.x, y: pos.y, z: pos.z });
+                  lastPlacementTime = now;
                 }
               }
+            });
+            scene.add(controller);
+
+            // Animation loop with transient hit testing
+            renderer.setAnimationLoop((time, frame) => {
+              if (!frame) {
+                renderer.render(scene, camera);
+                return;
+              }
+
+              // Process transient hit test results for reticle placement
+              if (xrHitTestSource) {
+                const hitTestResults = frame.getHitTestResultsForTransientInput(xrHitTestSource);
+                
+                if (hitTestResults.length > 0) {
+                  // Check if this is a new tap (inputSource just started)
+                  const inputSource = hitTestResults[0].inputSource;
+                  const inputHitResults = hitTestResults[0].results;
+                  
+                  if (inputHitResults.length > 0) {
+                    const hit = inputHitResults[0];
+                    const pose = hit.getPose(localFloorSpace);
+                    
+                    if (pose) {
+                      reticle.visible = true;
+                      reticle.matrix.fromArray(pose.transform.matrix);
+                      
+                      // Place grass when user taps (with cooldown to prevent spam)
+                      const now = Date.now();
+                      if (now - lastPlacementTime > placementCooldown) {
+                        const position = pose.transform.position;
+                        addGrassAtPoint({ x: position.x, y: position.y, z: position.z });
+                        lastPlacementTime = now;
+                      }
+                    }
+                  }
+                } else {
+                  reticle.visible = false;
+                }
+              }
+              
               renderer.render(scene, camera);
             });
 
@@ -317,6 +378,7 @@ export default function ARPreviewMultiPlacement({
               }
               grassInstances.forEach(instance => scene.remove(instance));
               grassInstances.length = 0;
+              if (reticle) scene.remove(reticle);
             });
           }).catch((error) => {
             console.error('WebXR session failed:', error);
