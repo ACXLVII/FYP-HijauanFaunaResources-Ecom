@@ -91,30 +91,20 @@ export default function ARPreviewMultiPlacement({
   const handleStartAR = async () => {
     setShowInstructions(false);
 
-    // STEP 1: Handle iOS AR with Quick Look (simple single placement)
+    // STEP 1: Handle iOS AR with Quick Look
     if (isIOS && iosSrc) {
-      // Create anchor element for Quick Look
       const arAnchor = document.createElement('a');
       arAnchor.rel = 'ar';
-      
-      // Add Quick Look parameters for better behavior
       const iosUrl = new URL(iosSrc, window.location.origin);
-      iosUrl.hash = 'allowsContentScaling=0'; // Disable automatic scaling
+      iosUrl.hash = 'allowsContentScaling=0';
       arAnchor.href = iosUrl.href;
-      
-      // Append to body
       document.body.appendChild(arAnchor);
-      
-      // Trigger click to open Quick Look
       arAnchor.click();
-      
-      // Cleanup after a short delay
       setTimeout(() => {
         if (document.body.contains(arAnchor)) {
           document.body.removeChild(arAnchor);
         }
       }, 100);
-      
       return;
     }
 
@@ -214,13 +204,18 @@ export default function ARPreviewMultiPlacement({
       loader.load(
         modelSrc,
         (gltf) => {
-          grassModel = gltf.scene;
-
+          // Don't modify the original model - wrap it in a container for proper rotation
+          const originalModel = gltf.scene;
+          
           updateDebug('Model loaded! Point at floor...');
 
-          // IMPORTANT: Rotate the base model to lay flat on floor
-          // If your grass model is exported "standing up", rotate it -90° on X axis
-          grassModel.rotation.x = -Math.PI / 2; // Rotate to lay flat
+          // Create a wrapper group to handle rotation without affecting child transforms
+          grassModel = new THREE.Group();
+          grassModel.add(originalModel);
+          
+          // Rotate the wrapper to lay flat (if needed)
+          // Try without rotation first to see if GLB is already oriented correctly
+          // grassModel.rotation.x = -Math.PI / 2;
 
           // Compute a Y offset so the model's "bottom" sits on the detected floor.
           // Many grass models have their origin at the center, which makes them float.
@@ -442,6 +437,11 @@ export default function ARPreviewMultiPlacement({
   };
 
   if (!isClient) return null;
+
+  // TEMPORARILY: Hide AR button on iOS since USDZ models are broken
+  if (isIOS) {
+    return null; // Don't show AR button on iOS
+  }
 
   if (!isMobile) {
     return (
