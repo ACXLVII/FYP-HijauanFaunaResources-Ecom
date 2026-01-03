@@ -112,38 +112,38 @@ export default function PricingCalculator({
   const [showErrors, setShowErrors] = useState(false);
   const { addToCart } = useCart();
 
-  // Helper function to get AR model paths based on product name
+  // Helper function to get AR model paths based on product name (Android/WebXR only)
   const getARModelPaths = (productName) => {
     const nameLower = (productName || '').toLowerCase();
     
     // Match thickness from product name (15mm, 20mm, 25mm, 30mm, 35mm, 40mm)
     if (nameLower.includes('15mm') || nameLower.includes('15 mm')) {
-      return {
+      return { 
         modelSrc: '/models/artificial_grass/15mm.glb',
         iosSrc: '/models/artificial_grass/15mm.usdz'
       };
     } else if (nameLower.includes('20mm') || nameLower.includes('20 mm')) {
-      return {
+      return { 
         modelSrc: '/models/artificial_grass/20mm.glb',
         iosSrc: '/models/artificial_grass/20mm.usdz'
       };
     } else if (nameLower.includes('25mm') || nameLower.includes('25 mm')) {
-      return {
+      return { 
         modelSrc: '/models/artificial_grass/25mm.glb',
         iosSrc: '/models/artificial_grass/25mm.usdz'
       };
     } else if (nameLower.includes('30mm') || nameLower.includes('30 mm')) {
-      return {
+      return { 
         modelSrc: '/models/artificial_grass/30mm.glb',
         iosSrc: '/models/artificial_grass/30mm.usdz'
       };
     } else if (nameLower.includes('35mm') || nameLower.includes('35 mm')) {
-      return {
+      return { 
         modelSrc: '/models/artificial_grass/35mm.glb',
         iosSrc: '/models/artificial_grass/35mm.usdz'
       };
     } else if (nameLower.includes('40mm') || nameLower.includes('40 mm')) {
-      return {
+      return { 
         modelSrc: '/models/artificial_grass/40mm.glb',
         iosSrc: '/models/artificial_grass/40mm.usdz'
       };
@@ -151,6 +151,25 @@ export default function PricingCalculator({
     
     return null;
   };
+
+  // iOS AR Quick Look function
+  const handleIOSAR = (iosSrc) => {
+    if (!iosSrc) return;
+    
+    const arAnchor = document.createElement('a');
+    arAnchor.rel = 'ar';
+    const iosUrl = new URL(iosSrc, window.location.origin);
+    iosUrl.hash = 'allowsContentScaling=0';
+    arAnchor.href = iosUrl.href;
+    document.body.appendChild(arAnchor);
+    arAnchor.click();
+    setTimeout(() => {
+      if (document.body.contains(arAnchor)) {
+        document.body.removeChild(arAnchor);
+      }
+    }, 100);
+  };
+
 
   // Early return if priceGroup is missing or invalid (after hooks)
   if (!priceGroup || !Array.isArray(priceGroup) || priceGroup.length === 0) {
@@ -656,17 +675,36 @@ export default function PricingCalculator({
         Add to Cart
       </button>
 
-      {/* AR Preview Button */}
+      {/* AR Preview Button - Android */}
       {(() => {
         const arPaths = getARModelPaths(name);
         if (!arPaths) return null;
         
+          return (
+            <ARPreviewMultiPlacement
+              className="w-full p-4 bg-[#623183] rounded-md lg:rounded-lg shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-3"
+              modelSrc={arPaths.modelSrc}
+              arPlacement="floor"
+            >
+            <div className="flex items-center justify-center gap-2 lg:gap-4">
+              <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+              <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                Preview in AR (Android)
+              </h1>
+            </div>
+          </ARPreviewMultiPlacement>
+        );
+      })()}
+
+      {/* iOS AR Button - Quick Look */}
+      {(() => {
+        const arPaths = getARModelPaths(name);
+        if (!arPaths || !arPaths.iosSrc) return null;
+        
         return (
-          <ARPreviewMultiPlacement
-            className="w-full p-4 bg-[#623183] rounded-md lg:rounded-lg shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70"
-            modelSrc={arPaths.modelSrc}
-            iosSrc={arPaths.iosSrc}
-            arPlacement="floor"
+          <button
+            className="w-full p-4 bg-[#623183] rounded-md lg:rounded-lg shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 mt-3"
+            onClick={() => handleIOSAR(arPaths.iosSrc)}
           >
             <div className="flex items-center justify-center gap-2 lg:gap-4">
               <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
@@ -674,7 +712,7 @@ export default function PricingCalculator({
                 Preview in AR
               </h1>
             </div>
-          </ARPreviewMultiPlacement>
+          </button>
         );
       })()}
 

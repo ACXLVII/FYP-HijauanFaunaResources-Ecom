@@ -61,28 +61,46 @@ export default function ProductCard({ product }) {
     
     // Map product names to model paths
     if (nameLower.includes('japanese')) {
-      return {
+      return { 
         modelSrc: '/models/live_grass/japanese.glb',
         iosSrc: '/models/live_grass/japanese.usdz'
       };
     } else if (nameLower.includes('philippine')) {
-      return {
+      return { 
         modelSrc: '/models/live_grass/philippine.glb',
         iosSrc: '/models/live_grass/philippine.usdz'
       };
     } else if (nameLower.includes('pearl')) {
-      return {
+      return { 
         modelSrc: '/models/live_grass/pearl.glb',
         iosSrc: '/models/live_grass/pearl.usdz'
       };
     } else if (nameLower.includes('cow')) {
-      return {
+      return { 
         modelSrc: '/models/live_grass/cow.glb',
         iosSrc: '/models/live_grass/cow.usdz'
       };
     }
     
     return null;
+  };
+
+  // iOS AR Quick Look function
+  const handleIOSAR = (iosSrc) => {
+    if (!iosSrc) return;
+    
+    const arAnchor = document.createElement('a');
+    arAnchor.rel = 'ar';
+    const iosUrl = new URL(iosSrc, window.location.origin);
+    iosUrl.hash = 'allowsContentScaling=0';
+    arAnchor.href = iosUrl.href;
+    document.body.appendChild(arAnchor);
+    arAnchor.click();
+    setTimeout(() => {
+      if (document.body.contains(arAnchor)) {
+        document.body.removeChild(arAnchor);
+      }
+    }, 100);
   };
   
   // Helper function to convert base64 string to data URI
@@ -241,17 +259,36 @@ export default function ProductCard({ product }) {
           </h1>
         </button>
 
-        {/* AR Preview Button */}
+        {/* AR Preview Button - Android Only */}
         {(() => {
           const arPaths = getARModelPaths(product.name);
           if (!arPaths) return null;
           
           return (
             <ARPreviewMultiPlacement
-              className="lg:hidden w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
+              className="w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
               modelSrc={arPaths.modelSrc}
-              iosSrc={arPaths.iosSrc}
               arPlacement="floor"
+            >
+              <div className="flex items-center justify-center gap-2 lg:gap-4">
+                <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+                <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                  Preview in AR (Android)
+                </h1>
+              </div>
+            </ARPreviewMultiPlacement>
+          );
+        })()}
+
+        {/* iOS AR Button - Quick Look */}
+        {(() => {
+          const arPaths = getARModelPaths(product.name);
+          if (!arPaths || !arPaths.iosSrc) return null;
+          
+          return (
+            <button
+              className="w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 mt-2 lg:mt-3"
+              onClick={() => handleIOSAR(arPaths.iosSrc)}
             >
               <div className="flex items-center justify-center gap-2 lg:gap-4">
                 <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
@@ -259,7 +296,7 @@ export default function ProductCard({ product }) {
                   Preview in AR
                 </h1>
               </div>
-            </ARPreviewMultiPlacement>
+            </button>
           );
         })()}
 

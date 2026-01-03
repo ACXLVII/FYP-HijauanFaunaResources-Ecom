@@ -4,14 +4,12 @@ import React, { useEffect, useState, useRef } from 'react';
 
 /**
  * Enhanced AR Preview with Multi-Placement
- * - iOS: Simple Quick Look AR (single placement) using USDZ files
- * - Android: Tap screen to add multiple grass instances using WebXR with Three.js
- * - Works on both iOS and Android devices
+ * - Android ONLY: Tap screen to add multiple grass instances using WebXR with Three.js
+ * - iOS is NOT supported (disabled)
  */
 export default function ARPreviewMultiPlacement({
   children,
   modelSrc,
-  iosSrc,
   arPlacement = 'floor',
   className = '',
 }) {
@@ -91,24 +89,13 @@ export default function ARPreviewMultiPlacement({
   const handleStartAR = async () => {
     setShowInstructions(false);
 
-    // STEP 1: Handle iOS AR with Quick Look
-    if (isIOS && iosSrc) {
-      const arAnchor = document.createElement('a');
-      arAnchor.rel = 'ar';
-      const iosUrl = new URL(iosSrc, window.location.origin);
-      iosUrl.hash = 'allowsContentScaling=0';
-      arAnchor.href = iosUrl.href;
-      document.body.appendChild(arAnchor);
-      arAnchor.click();
-      setTimeout(() => {
-        if (document.body.contains(arAnchor)) {
-          document.body.removeChild(arAnchor);
-        }
-      }, 100);
+    // iOS AR is DISABLED - Android/WebXR only
+    if (isIOS) {
+      alert('AR Preview is currently only available on Android devices with WebXR support.');
       return;
     }
 
-    // STEP 2: Handle Android/Web AR with WebXR multi-placement
+    // Handle Android/Web AR with WebXR multi-placement
     if (webXRSupported && window.THREE) {
       await startWebXRAR();
     } else {
@@ -481,29 +468,17 @@ export default function ARPreviewMultiPlacement({
 
             {/* Title */}
             <h2 className="text-2xl font-bold text-center mb-3 text-gray-800">
-              {isIOS ? 'AR Preview' : 'AR Multi-Placement'}
+              AR Multi-Placement (Android Only)
             </h2>
 
             {/* Instructions */}
             <div className="space-y-3 mb-6">
               {isIOS ? (
                 <>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Point your camera at a flat surface (floor)
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Tap to place the grass model
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                    <p className="text-gray-700 text-sm pt-0.5">
-                      Move your device to view from different angles
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-sm text-red-800 text-center">
+                      <strong>iOS Not Supported:</strong><br />
+                      AR Preview is currently only available on Android devices with WebXR support.
                     </p>
                   </div>
                 </>
