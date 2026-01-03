@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import PropTypes from 'prop-types';
 import { useCart } from '@/app/hooks/useCart';
+import ARPreviewMultiPlacement from '@/app/arPreview/ARPreviewMultiPlacement';
 
 // Icon Imports
 import {
@@ -36,6 +37,7 @@ import {
   MdOutlineTexture
 } from "react-icons/md";
 import {
+  TbAugmentedReality2,
   TbRuler
 } from "react-icons/tb";
 import {
@@ -109,6 +111,46 @@ export default function PricingCalculator({
   const [focusedField, setFocusedField] = useState(null);
   const [showErrors, setShowErrors] = useState(false);
   const { addToCart } = useCart();
+
+  // Helper function to get AR model paths based on product name
+  const getARModelPaths = (productName) => {
+    const nameLower = (productName || '').toLowerCase();
+    
+    // Match thickness from product name (15mm, 20mm, 25mm, 30mm, 35mm, 40mm)
+    if (nameLower.includes('15mm') || nameLower.includes('15 mm')) {
+      return {
+        modelSrc: '/models/artificial_grass/15mm.glb',
+        iosSrc: '/models/artificial_grass/15mm.usdz'
+      };
+    } else if (nameLower.includes('20mm') || nameLower.includes('20 mm')) {
+      return {
+        modelSrc: '/models/artificial_grass/20mm.glb',
+        iosSrc: '/models/artificial_grass/20mm.usdz'
+      };
+    } else if (nameLower.includes('25mm') || nameLower.includes('25 mm')) {
+      return {
+        modelSrc: '/models/artificial_grass/25mm.glb',
+        iosSrc: '/models/artificial_grass/25mm.usdz'
+      };
+    } else if (nameLower.includes('30mm') || nameLower.includes('30 mm')) {
+      return {
+        modelSrc: '/models/artificial_grass/30mm.glb',
+        iosSrc: '/models/artificial_grass/30mm.usdz'
+      };
+    } else if (nameLower.includes('35mm') || nameLower.includes('35 mm')) {
+      return {
+        modelSrc: '/models/artificial_grass/35mm.glb',
+        iosSrc: '/models/artificial_grass/35mm.usdz'
+      };
+    } else if (nameLower.includes('40mm') || nameLower.includes('40 mm')) {
+      return {
+        modelSrc: '/models/artificial_grass/40mm.glb',
+        iosSrc: '/models/artificial_grass/40mm.usdz'
+      };
+    }
+    
+    return null;
+  };
 
   // Early return if priceGroup is missing or invalid (after hooks)
   if (!priceGroup || !Array.isArray(priceGroup) || priceGroup.length === 0) {
@@ -613,6 +655,28 @@ export default function PricingCalculator({
       >
         Add to Cart
       </button>
+
+      {/* AR Preview Button */}
+      {(() => {
+        const arPaths = getARModelPaths(name);
+        if (!arPaths) return null;
+        
+        return (
+          <ARPreviewMultiPlacement
+            className="w-full p-4 bg-[#623183] rounded-md lg:rounded-lg shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70"
+            modelSrc={arPaths.modelSrc}
+            iosSrc={arPaths.iosSrc}
+            arPlacement="floor"
+          >
+            <div className="flex items-center justify-center gap-2 lg:gap-4">
+              <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
+              <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
+                Preview in AR
+              </h1>
+            </div>
+          </ARPreviewMultiPlacement>
+        );
+      })()}
 
     </div>
   );
