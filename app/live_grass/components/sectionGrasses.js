@@ -145,8 +145,8 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> homeowners, premium gardens, aesthetic lawn lovers.
                 </p>
                 
-               {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                {/* Button Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   {/* Android AR Button */}
                   <ARPreviewMultiPlacement
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
@@ -224,8 +224,8 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> shaded lawns, family backyards, barefoot play zones.
                 </p>
                 
-               {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                {/* Button Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   {/* Android AR Button */}
                   <ARPreviewMultiPlacement
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
@@ -303,8 +303,8 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> decorative landscaping, borders, garden beds.
                 </p>
                 
-               {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                {/* Button Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   {/* Android AR Button */}
                   <ARPreviewMultiPlacement
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
@@ -382,8 +382,8 @@ export default function SectionGrasses() {
                   <span className="font-bold">Perfect for:</span> schools, open fields, budget-friendly lawn coverage.
                 </p>
                 
-               {/* Button Grid */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                {/* Button Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                   {/* Android AR Button */}
                   <ARPreviewMultiPlacement
                     className="p-2 lg:p-3 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
