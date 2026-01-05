@@ -4,12 +4,13 @@ import React, { useEffect, useState, useRef } from 'react';
 
 /**
  * Enhanced AR Preview with Multi-Placement
- * - Android ONLY: Tap screen to add multiple grass instances using WebXR with Three.js
- * - iOS is NOT supported (disabled)
+ * - Android: Tap screen to add multiple grass instances using WebXR with Three.js
+ * - iOS: Uses Quick Look for AR preview
  */
 export default function ARPreviewMultiPlacement({
   children,
   modelSrc,
+  iosSrc,
   arPlacement = 'floor',
   className = '',
 }) {
@@ -89,9 +90,13 @@ export default function ARPreviewMultiPlacement({
   const handleStartAR = async () => {
     setShowInstructions(false);
 
-    // iOS AR is DISABLED - Android/WebXR only
+    // Handle iOS AR with Quick Look
     if (isIOS) {
-      alert('AR Preview is currently only available on Android devices with WebXR support.');
+      if (!iosSrc) {
+        alert('AR Preview is not available for this product on iOS.');
+        return;
+      }
+      startIOSAR();
       return;
     }
 
@@ -102,6 +107,22 @@ export default function ARPreviewMultiPlacement({
       // Fallback to model-viewer (single placement only)
       startModelViewerAR();
     }
+  };
+
+  const startIOSAR = () => {
+    // iOS AR Quick Look implementation
+    const arAnchor = document.createElement('a');
+    arAnchor.rel = 'ar';
+    const iosUrl = new URL(iosSrc, window.location.origin);
+    iosUrl.hash = 'allowsContentScaling=0';
+    arAnchor.href = iosUrl.href;
+    document.body.appendChild(arAnchor);
+    arAnchor.click();
+    setTimeout(() => {
+      if (document.body.contains(arAnchor)) {
+        document.body.removeChild(arAnchor);
+      }
+    }, 100);
   };
 
   const startWebXRAR = async () => {
@@ -425,9 +446,9 @@ export default function ARPreviewMultiPlacement({
 
   if (!isClient) return null;
 
-  // TEMPORARILY: Hide AR button on iOS since USDZ models are broken
-  if (isIOS) {
-    return null; // Don't show AR button on iOS
+  // Hide button if iOS but no iosSrc provided
+  if (isIOS && !iosSrc) {
+    return null;
   }
 
   if (!isMobile) {
@@ -468,17 +489,29 @@ export default function ARPreviewMultiPlacement({
 
             {/* Title */}
             <h2 className="text-2xl font-bold text-center mb-3 text-gray-800">
-              AR Grass Placement
+              {isIOS ? 'AR Preview (iOS)' : 'AR Multi-Placement (Android)'}
             </h2>
 
             {/* Instructions */}
             <div className="space-y-3 mb-6">
               {isIOS ? (
                 <>
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p className="text-sm text-red-800 text-center">
-                      <strong>iOS Not Supported:</strong><br />
-                      AR Preview is currently only available on Android devices with WebXR support.
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Tap "Start AR" to open Quick Look
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      Point your camera at a flat surface
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                    <p className="text-gray-700 text-sm pt-0.5">
+                      View and interact with the 3D model in AR
                     </p>
                   </div>
                 </>
