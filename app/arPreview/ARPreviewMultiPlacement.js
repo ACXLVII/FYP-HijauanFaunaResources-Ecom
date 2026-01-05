@@ -261,13 +261,9 @@ export default function ARPreviewMultiPlacement({
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
         
-        // For iOS, cleanup immediately after Quick Look opens (since we keep viewer hidden)
-        if (isIOS) {
-          // Quick Look is native and opens immediately, so cleanup shortly after
-          setTimeout(() => {
-            cleanup();
-          }, 500);
-        }
+        // For iOS, let Quick Look run independently
+        // Our event listeners (pageshow, visibilitychange) will cleanup when user closes it
+        // For Android, the cleanup happens via ar-status and polling
       } else {
         cleanup();
         throw new Error('AR not available on this device or browser.');
