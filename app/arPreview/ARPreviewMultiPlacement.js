@@ -76,8 +76,26 @@ export default function ARPreviewMultiPlacement({
     );
   }
 
-  // iOS: Use model-viewer like Android (to fix texture issue)
-  // Native Quick Look has single-sided rendering issues with USDZ files
+  // iOS: Use native <a rel="ar"> - INSTANT, NO LOADING
+  if (isIOS && iosSrc) {
+    return (
+      <a
+        href={iosSrc}
+        rel="ar"
+        className={className}
+        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      >
+        <img 
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+          alt="AR Preview"
+          style={{ display: 'none' }}
+        />
+        {children}
+      </a>
+    );
+  }
+
+  // Android: model-viewer with proper scaling
   return (
     <>
       {/* AR Button */}
@@ -85,14 +103,13 @@ export default function ARPreviewMultiPlacement({
         {children}
       </div>
 
-      {/* Model Viewer - Works for both iOS and Android */}
-      {isClient && (
+      {/* Model Viewer - Configured for realistic size */}
+      {isClient && !isIOS && (
         <model-viewer
           ref={modelViewerRef}
           src={modelSrc}
-          ios-src={iosSrc}
           ar
-          ar-modes="scene-viewer webxr quick-look"
+          ar-modes="scene-viewer webxr"
           ar-placement="floor"
           ar-scale="fixed"
           scale="0.35 0.35 0.35"
