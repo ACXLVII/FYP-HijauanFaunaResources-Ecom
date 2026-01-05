@@ -66,8 +66,11 @@ export default function ARPreviewMultiPlacement({
   const hideModelViewer = () => {
     if (modelViewerRef.current) {
       const viewer = modelViewerRef.current;
-      // Force hide with multiple methods
-      viewer.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+      // Force hide with multiple methods and disable all interactions
+      viewer.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -9999 !important;';
+      
+      // Disable camera controls if they were somehow enabled
+      viewer.removeAttribute('camera-controls');
       
       // For iOS, also try to dismiss AR if it's still active
       if (isIOS && viewer.dismissPoster && typeof viewer.dismissPoster === 'function') {
@@ -75,6 +78,15 @@ export default function ARPreviewMultiPlacement({
           viewer.dismissPoster();
         } catch (e) {
           console.warn('Could not dismiss poster:', e);
+        }
+      }
+      
+      // Try to exit any presentation mode
+      if (viewer.exitPresent && typeof viewer.exitPresent === 'function') {
+        try {
+          viewer.exitPresent();
+        } catch (e) {
+          console.warn('Could not exit present:', e);
         }
       }
       
@@ -220,8 +232,10 @@ export default function ARPreviewMultiPlacement({
         cleanup();
       }, 300000); // 5 minutes
       
-      // Make model-viewer visible for AR activation
-      modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block; visibility: visible; opacity: 1;';
+      // Make model-viewer visible for AR activation (but NOT on iOS - Quick Look handles it)
+      if (!isIOS) {
+        modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block; visibility: visible; opacity: 1;';
+      }
       
       // Wait for model to load if needed
       if (!modelViewer.loaded) {
@@ -247,14 +261,12 @@ export default function ARPreviewMultiPlacement({
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
         
-        // For iOS, also set up a more aggressive cleanup check
+        // For iOS, cleanup immediately after Quick Look opens (since we keep viewer hidden)
         if (isIOS) {
-          // Check immediately after activation
+          // Quick Look is native and opens immediately, so cleanup shortly after
           setTimeout(() => {
-            if (modelViewer && !modelViewer.modelIsVisible) {
-              cleanup();
-            }
-          }, 1000);
+            cleanup();
+          }, 500);
         }
       } else {
         cleanup();
@@ -392,7 +404,6 @@ export default function ARPreviewMultiPlacement({
           ar-modes="webxr scene-viewer quick-look"
           ar-placement={arPlacement}
           ar-scale="auto"
-          camera-controls
           loading="eager"
           style={{ 
             display: 'none',
@@ -403,7 +414,8 @@ export default function ARPreviewMultiPlacement({
             height: '1px',
             visibility: 'hidden',
             opacity: 0,
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            zIndex: -9999
           }}
         />
       )}
