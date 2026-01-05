@@ -3,10 +3,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 /**
- * AR Preview - Fresh, Fast Implementation
- * - iOS: Uses native <a rel="ar"> for Quick Look
- * - Android: Uses model-viewer for Scene Viewer
- * - Floor placement with exact square shape
+ * Fast AR Preview - Optimized for Speed
+ * - iOS: Native <a rel="ar"> for instant Quick Look
+ * - Android: model-viewer with Scene Viewer
+ * - Proper grass scaling for realistic size
  */
 export default function ARPreviewMultiPlacement({
   children,
@@ -21,29 +21,24 @@ export default function ARPreviewMultiPlacement({
   const [isMobile, setIsMobile] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
-  // Initialize client-side detection and load model-viewer
+  // Fast initialization - no delays
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     setIsClient(true);
     
-    // Detect iOS devices
-    const userAgentCheck = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const iPadOSCheck = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    const isIOSDevice = userAgentCheck || iPadOSCheck;
+    // Detect iOS
+    const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     setIsIOS(isIOSDevice);
     
-    // Detect mobile devices
-    const checkMobile = () => {
-      const isMobileDevice = window.innerWidth <= 1024 || 
-                             /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      setIsMobile(isMobileDevice);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    // Detect mobile
+    const isMobileDevice = window.innerWidth <= 1024 || 
+                           /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    setIsMobile(isMobileDevice);
 
-    // Load model-viewer library for Android
-    if (!isIOSDevice) {
+    // Load model-viewer ONLY for Android (skip for iOS for speed)
+    if (!isIOSDevice && isMobileDevice) {
       const loadModelViewer = async () => {
         if (window.customElements?.get('model-viewer')) return;
         try {
@@ -54,26 +49,18 @@ export default function ARPreviewMultiPlacement({
       };
       loadModelViewer();
     }
-
-    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Android AR activation (model-viewer)
+  // Android: Direct AR activation - NO delays
   const handleAndroidARClick = () => {
-    if (!modelViewerRef.current) {
-      console.error('Model viewer not ready');
-      return;
-    }
-    
-    console.log('Android AR clicked - activating...');
+    if (!modelViewerRef.current) return;
     
     const viewer = modelViewerRef.current;
     if (viewer && typeof viewer.activateAR === 'function') {
+      // Instant activation - no waiting
       viewer.activateAR().catch(err => {
-        console.error('AR activation failed:', err);
+        console.error('AR failed:', err);
       });
-    } else {
-      console.error('activateAR not available');
     }
   };
 
@@ -89,14 +76,14 @@ export default function ARPreviewMultiPlacement({
     );
   }
 
-  // iOS: Use native <a rel="ar"> for Quick Look
+  // iOS: Use native <a rel="ar"> - INSTANT, NO LOADING
   if (isIOS && iosSrc) {
     return (
       <a
         href={iosSrc}
         rel="ar"
         className={className}
-        style={{ textDecoration: 'none', color: 'inherit' }}
+        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
       >
         <img 
           src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
@@ -108,24 +95,26 @@ export default function ARPreviewMultiPlacement({
     );
   }
 
-  // Android: Use model-viewer
+  // Android: model-viewer with proper scaling
   return (
     <>
-      {/* AR Button - Click to activate (Android) */}
+      {/* AR Button */}
       <div className={className} onClick={handleAndroidARClick}>
         {children}
       </div>
 
-      {/* Model Viewer - Hidden but ready for AR (Android only) */}
+      {/* Model Viewer - Configured for realistic size */}
       {isClient && !isIOS && (
         <model-viewer
           ref={modelViewerRef}
           src={modelSrc}
           ar
-          ar-modes="webxr scene-viewer"
+          ar-modes="scene-viewer webxr"
           ar-placement="floor"
+          ar-scale="auto"
           camera-controls
           loading="eager"
+          interaction-prompt="none"
           style={{ 
             display: 'none',
             position: 'fixed',
