@@ -64,42 +64,47 @@ export default function ARPreviewMultiPlacement({
 
   // Cleanup function to hide model-viewer
   const hideModelViewer = () => {
+    console.log('[AR Cleanup] Starting cleanup, isIOS:', isIOS);
+    
     if (modelViewerRef.current) {
       const viewer = modelViewerRef.current;
-      // Force hide with multiple methods and disable all interactions
-      viewer.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -9999 !important;';
       
-      // Disable camera controls if they were somehow enabled
-      viewer.removeAttribute('camera-controls');
-      
-      // For iOS, also try to dismiss AR if it's still active
-      if (isIOS && viewer.dismissPoster && typeof viewer.dismissPoster === 'function') {
-        try {
-          viewer.dismissPoster();
-        } catch (e) {
-          console.warn('Could not dismiss poster:', e);
-        }
-      }
-      
-      // Try to exit any presentation mode
+      // Try to exit any presentation mode first
       if (viewer.exitPresent && typeof viewer.exitPresent === 'function') {
         try {
           viewer.exitPresent();
+          console.log('[AR Cleanup] Called exitPresent');
         } catch (e) {
-          console.warn('Could not exit present:', e);
+          console.warn('[AR Cleanup] Could not exit present:', e);
         }
       }
       
-      // Remove AR attribute to ensure it's not active
-      if (viewer.hasAttribute('ar')) {
-        viewer.removeAttribute('ar');
-        // Re-add it after a moment to reset state
-        setTimeout(() => {
-          if (viewer) {
-            viewer.setAttribute('ar', '');
-          }
-        }, 100);
+      // For iOS, try to dismiss AR if it's still active
+      if (isIOS && viewer.dismissPoster && typeof viewer.dismissPoster === 'function') {
+        try {
+          viewer.dismissPoster();
+          console.log('[AR Cleanup] Called dismissPoster (iOS)');
+        } catch (e) {
+          console.warn('[AR Cleanup] Could not dismiss poster:', e);
+        }
       }
+      
+      // Force hide with inline styles (don't use cssText as it replaces everything)
+      viewer.style.display = 'none';
+      viewer.style.position = 'fixed';
+      viewer.style.top = '-9999px';
+      viewer.style.left = '-9999px';
+      viewer.style.width = '1px';
+      viewer.style.height = '1px';
+      viewer.style.visibility = 'hidden';
+      viewer.style.opacity = '0';
+      viewer.style.pointerEvents = 'none';
+      viewer.style.zIndex = '-9999';
+      
+      // IMPORTANT: Don't remove the 'ar' attribute or 'camera-controls'
+      // This was breaking iOS re-launches. Just hide the element visually.
+      
+      console.log('[AR Cleanup] Model viewer hidden');
     }
     setIsActivating(false);
   };
@@ -128,6 +133,8 @@ export default function ARPreviewMultiPlacement({
   };
 
   const handleStartAR = async () => {
+    console.log('[AR Start] handleStartAR called, isIOS:', isIOS);
+    
     if (!modelViewerRef.current) {
       setError('AR not available. Please refresh the page and try again.');
       setShowInstructions(false);
@@ -136,13 +143,18 @@ export default function ARPreviewMultiPlacement({
 
     // Clean up any previous AR session
     if (cleanupRef.current) {
+      console.log('[AR Start] Cleaning up previous session');
       cleanupRef.current();
       cleanupRef.current = null;
+      // Wait a moment for cleanup to complete
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
 
     setShowInstructions(false);
     setIsActivating(true);
     setError(null);
+    
+    console.log('[AR Start] State reset, starting AR activation...');
 
     const modelViewer = modelViewerRef.current;
     let checkInterval = null;
@@ -169,17 +181,23 @@ export default function ARPreviewMultiPlacement({
     try {
       // Listen for visibility change (when user switches away from AR)
       visibilityHandler = () => {
+        console.log('[AR Visibility] State changed:', document.visibilityState);
         if (document.visibilityState === 'visible') {
-          // On iOS, when returning from Quick Look, hide immediately
+          // On iOS, when returning from Quick Look, check if AR is done
           if (isIOS) {
+            console.log('[AR iOS] Document visible, waiting to check AR state');
             setTimeout(() => {
               if (modelViewer && !modelViewer.modelIsVisible) {
+                console.log('[AR iOS] AR not visible, cleaning up');
                 cleanup();
+              } else {
+                console.log('[AR iOS] Model still visible or viewer not ready');
               }
-            }, 100);
+            }, 300);
           } else {
             setTimeout(() => {
               if (modelViewer && !modelViewer.modelIsVisible) {
+                console.log('[AR Android] AR not visible, cleaning up');
                 cleanup();
               }
             }, 500);
@@ -191,15 +209,20 @@ export default function ARPreviewMultiPlacement({
       // iOS-specific: Listen for pageshow/pagehide events
       if (isIOS) {
         pageShowHandler = () => {
+          console.log('[AR iOS] Page shown, checking if AR is still active');
           // When page becomes visible again (after Quick Look closes)
           setTimeout(() => {
-            cleanup();
-          }, 100);
+            if (modelViewer && !modelViewer.modelIsVisible) {
+              console.log('[AR iOS] Page shown and AR not visible, cleaning up');
+              cleanup();
+            }
+          }, 200);
         };
         window.addEventListener('pageshow', pageShowHandler);
 
         pageHideHandler = () => {
           // Page is being hidden (Quick Look opening)
+          console.log('[AR iOS] Page hiding (Quick Look opening)');
           // Don't cleanup here, just note it
         };
         window.addEventListener('pagehide', pageHideHandler);
@@ -208,7 +231,9 @@ export default function ARPreviewMultiPlacement({
       // Listen for AR session end
       arStatusHandler = (event) => {
         const status = event.detail?.status;
+        console.log('[AR Status] AR status event:', status);
         if (status === 'not-presenting' || status === 'failed' || status === 'session-ended') {
+          console.log('[AR Status] AR session ended, cleaning up');
           cleanup();
         }
       };
@@ -222,10 +247,11 @@ export default function ARPreviewMultiPlacement({
                            (modelViewer.canActivateAR && modelViewer.modelIsVisible);
           
           if (!isARActive && isActivating) {
+            console.log('[AR Polling] AR inactive detected, cleaning up');
             cleanup();
           }
         }
-      }, 500); // Check more frequently for iOS
+      }, 1000); // Check every second
       
       // Cleanup after 5 minutes max
       maxTimeout = setTimeout(() => {
@@ -264,12 +290,15 @@ export default function ARPreviewMultiPlacement({
       
       // Activate AR
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
+        console.log('[AR Activation] Calling activateAR() on model-viewer');
         await modelViewer.activateAR();
+        console.log('[AR Activation] activateAR() completed - AR should now be visible');
         
         // For iOS, let Quick Look run independently
         // Our event listeners (pageshow, visibilitychange) will cleanup when user closes it
         // For Android, the cleanup happens via ar-status and polling
       } else {
+        console.error('[AR Activation] activateAR function not available');
         cleanup();
         throw new Error('AR not available on this device or browser.');
       }
