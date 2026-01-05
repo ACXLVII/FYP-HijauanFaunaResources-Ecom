@@ -17,6 +17,7 @@ export default function ARPreviewMultiPlacement({
 }) {
   
   const modelViewerRef = useRef(null);
+  const cleanupRef = useRef(null); // Store cleanup functions
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -61,12 +62,51 @@ export default function ARPreviewMultiPlacement({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Cleanup function to hide model-viewer
+  const hideModelViewer = () => {
+    if (modelViewerRef.current) {
+      const viewer = modelViewerRef.current;
+      // Force hide with multiple methods
+      viewer.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+      
+      // For iOS, also try to dismiss AR if it's still active
+      if (isIOS && viewer.dismissPoster && typeof viewer.dismissPoster === 'function') {
+        try {
+          viewer.dismissPoster();
+        } catch (e) {
+          console.warn('Could not dismiss poster:', e);
+        }
+      }
+      
+      // Remove AR attribute to ensure it's not active
+      if (viewer.hasAttribute('ar')) {
+        viewer.removeAttribute('ar');
+        // Re-add it after a moment to reset state
+        setTimeout(() => {
+          if (viewer) {
+            viewer.setAttribute('ar', '');
+          }
+        }, 100);
+      }
+    }
+    setIsActivating(false);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up any active listeners
+      if (cleanupRef.current) {
+        cleanupRef.current();
+      }
+      hideModelViewer();
+    };
+  }, []);
+
   // Force hide model-viewer when not activating
   useEffect(() => {
     if (!isActivating && modelViewerRef.current) {
-      if (modelViewerRef.current) {
-        modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
-      }
+      hideModelViewer();
     }
   }, [isActivating]);
 
@@ -82,52 +122,102 @@ export default function ARPreviewMultiPlacement({
       return;
     }
 
+    // Clean up any previous AR session
+    if (cleanupRef.current) {
+      cleanupRef.current();
+      cleanupRef.current = null;
+    }
+
     setShowInstructions(false);
     setIsActivating(true);
     setError(null);
 
     const modelViewer = modelViewerRef.current;
+    let checkInterval = null;
+    let maxTimeout = null;
+    let visibilityHandler = null;
+    let arStatusHandler = null;
+    let pageShowHandler = null; // For iOS page show event
+    let pageHideHandler = null; // For iOS page hide event
+
+    // Create cleanup function
+    const cleanup = () => {
+      if (checkInterval) clearInterval(checkInterval);
+      if (maxTimeout) clearTimeout(maxTimeout);
+      if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler);
+      if (arStatusHandler && modelViewer) modelViewer.removeEventListener('ar-status', arStatusHandler);
+      if (pageShowHandler) window.removeEventListener('pageshow', pageShowHandler);
+      if (pageHideHandler) window.removeEventListener('pagehide', pageHideHandler);
+      hideModelViewer();
+    };
+
+    // Store cleanup function
+    cleanupRef.current = cleanup;
 
     try {
-      // Hide model-viewer function
-      const hideModelViewer = () => {
-        if (modelViewerRef.current) {
-          modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
-        }
-        setIsActivating(false);
-      };
-      
       // Listen for visibility change (when user switches away from AR)
-      const visibilityHandler = () => {
-        if (document.visibilityState === 'visible' && isActivating) {
-          setTimeout(hideModelViewer, 500);
+      visibilityHandler = () => {
+        if (document.visibilityState === 'visible') {
+          // On iOS, when returning from Quick Look, hide immediately
+          if (isIOS) {
+            setTimeout(() => {
+              if (modelViewer && !modelViewer.modelIsVisible) {
+                cleanup();
+              }
+            }, 100);
+          } else {
+            setTimeout(() => {
+              if (modelViewer && !modelViewer.modelIsVisible) {
+                cleanup();
+              }
+            }, 500);
+          }
         }
       };
       document.addEventListener('visibilitychange', visibilityHandler);
       
+      // iOS-specific: Listen for pageshow/pagehide events
+      if (isIOS) {
+        pageShowHandler = () => {
+          // When page becomes visible again (after Quick Look closes)
+          setTimeout(() => {
+            cleanup();
+          }, 100);
+        };
+        window.addEventListener('pageshow', pageShowHandler);
+
+        pageHideHandler = () => {
+          // Page is being hidden (Quick Look opening)
+          // Don't cleanup here, just note it
+        };
+        window.addEventListener('pagehide', pageHideHandler);
+      }
+      
       // Listen for AR session end
-      const arStatusHandler = (event) => {
-        if (event.detail.status === 'not-presenting' || event.detail.status === 'failed') {
-          hideModelViewer();
-          document.removeEventListener('visibilitychange', visibilityHandler);
+      arStatusHandler = (event) => {
+        const status = event.detail?.status;
+        if (status === 'not-presenting' || status === 'failed' || status === 'session-ended') {
+          cleanup();
         }
       };
       modelViewer.addEventListener('ar-status', arStatusHandler);
       
       // Fallback: Check periodically if AR is still active
-      const checkInterval = setInterval(() => {
-        if (modelViewer.canActivateAR && !modelViewer.modelIsVisible) {
-          hideModelViewer();
-          clearInterval(checkInterval);
-          document.removeEventListener('visibilitychange', visibilityHandler);
+      checkInterval = setInterval(() => {
+        if (modelViewer) {
+          // Check if AR is no longer active
+          const isARActive = modelViewer.arActive || 
+                           (modelViewer.canActivateAR && modelViewer.modelIsVisible);
+          
+          if (!isARActive && isActivating) {
+            cleanup();
+          }
         }
-      }, 1000);
+      }, 500); // Check more frequently for iOS
       
       // Cleanup after 5 minutes max
-      const maxTimeout = setTimeout(() => {
-        hideModelViewer();
-        clearInterval(checkInterval);
-        document.removeEventListener('visibilitychange', visibilityHandler);
+      maxTimeout = setTimeout(() => {
+        cleanup();
       }, 300000); // 5 minutes
       
       // Make model-viewer visible for AR activation
@@ -156,21 +246,25 @@ export default function ARPreviewMultiPlacement({
       // Activate AR
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
         await modelViewer.activateAR();
+        
+        // For iOS, also set up a more aggressive cleanup check
+        if (isIOS) {
+          // Check immediately after activation
+          setTimeout(() => {
+            if (modelViewer && !modelViewer.modelIsVisible) {
+              cleanup();
+            }
+          }, 1000);
+        }
       } else {
-        clearInterval(checkInterval);
-        clearTimeout(maxTimeout);
-        document.removeEventListener('visibilitychange', visibilityHandler);
+        cleanup();
         throw new Error('AR not available on this device or browser.');
       }
       
     } catch (err) {
       console.error('AR activation error:', err);
       setError(err.message || 'Failed to start AR. Please try again or use a different device.');
-      setIsActivating(false);
-      // Force hide model-viewer
-      if (modelViewerRef.current) {
-        modelViewerRef.current.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
-      }
+      cleanup();
     }
   };
 
