@@ -112,7 +112,7 @@ export default function ARPreviewMultiPlacement({
           ar-modes="scene-viewer webxr"
           ar-placement="floor"
           ar-scale="fixed"
-          scale="0.35 0.35 0.35"
+          scale="0.25 0.25 0.25"
           camera-controls
           loading="eager"
           interaction-prompt="none"
