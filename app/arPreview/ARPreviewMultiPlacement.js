@@ -237,8 +237,8 @@ export default function ARPreviewMultiPlacement({
         modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block; visibility: visible; opacity: 1;';
       }
       
-      // Wait for model to load if needed
-      if (!modelViewer.loaded) {
+      // Wait for model to load if needed (skip on iOS - it uses USDZ which loads separately)
+      if (!isIOS && !modelViewer.loaded) {
         await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => reject(new Error('Model loading timeout. Please check your connection.')), 15000);
           const onLoad = () => {
@@ -254,8 +254,13 @@ export default function ARPreviewMultiPlacement({
         });
       }
 
-      // Wait a moment for everything to be ready
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // On iOS, just wait briefly for model-viewer to be ready
+      if (isIOS) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } else {
+        // Wait a moment for everything to be ready
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
       
       // Activate AR
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
