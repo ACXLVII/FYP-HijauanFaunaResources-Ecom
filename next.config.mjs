@@ -33,6 +33,15 @@ const nextConfig = {
       },
     ];
   },
+  // Exclude large dependencies from serverless function tracing
+  // Files in public/ are served as static assets by Vercel's CDN
+  // They must be EXCLUDED from function tracing to avoid the 250MB limit
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/@google/model-viewer/**/*',
+      'public/models/**/*',  // Exclude model files from serverless functions
+    ],
+  },
 };
 
 export default nextConfig;
