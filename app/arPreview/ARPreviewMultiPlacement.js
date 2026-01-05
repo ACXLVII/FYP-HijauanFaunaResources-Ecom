@@ -4,8 +4,9 @@ import React, { useEffect, useState, useRef } from 'react';
 
 /**
  * AR Preview - Fresh, Fast Implementation
+ * - iOS: Uses native <a rel="ar"> for Quick Look
+ * - Android: Uses model-viewer for Scene Viewer
  * - Floor placement with exact square shape
- * - Optimized for quick loading
  */
 export default function ARPreviewMultiPlacement({
   children,
@@ -41,30 +42,38 @@ export default function ARPreviewMultiPlacement({
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Load model-viewer library
-    const loadModelViewer = async () => {
-      if (window.customElements?.get('model-viewer')) return;
-      try {
-        await import('@google/model-viewer');
-      } catch (err) {
-        console.error('Failed to load model-viewer:', err);
-      }
-    };
-    loadModelViewer();
+    // Load model-viewer library for Android
+    if (!isIOSDevice) {
+      const loadModelViewer = async () => {
+        if (window.customElements?.get('model-viewer')) return;
+        try {
+          await import('@google/model-viewer');
+        } catch (err) {
+          console.error('Failed to load model-viewer:', err);
+        }
+      };
+      loadModelViewer();
+    }
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Simple AR activation - just trigger it directly
-  const handleARClick = () => {
-    if (!modelViewerRef.current) return;
+  // Android AR activation (model-viewer)
+  const handleAndroidARClick = () => {
+    if (!modelViewerRef.current) {
+      console.error('Model viewer not ready');
+      return;
+    }
     
-    console.log('AR clicked - activating...');
+    console.log('Android AR clicked - activating...');
     
-    // Directly activate AR - model-viewer handles everything
     const viewer = modelViewerRef.current;
     if (viewer && typeof viewer.activateAR === 'function') {
-      viewer.activateAR();
+      viewer.activateAR().catch(err => {
+        console.error('AR activation failed:', err);
+      });
+    } else {
+      console.error('activateAR not available');
     }
   };
 
@@ -80,44 +89,55 @@ export default function ARPreviewMultiPlacement({
     );
   }
 
+  // iOS: Use native <a rel="ar"> for Quick Look
+  if (isIOS && iosSrc) {
+    return (
+      <a
+        href={iosSrc}
+        rel="ar"
+        className={className}
+        style={{ textDecoration: 'none', color: 'inherit' }}
+      >
+        <img 
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+          alt="AR Preview"
+          style={{ display: 'none' }}
+        />
+        {children}
+      </a>
+    );
+  }
+
+  // Android: Use model-viewer
   return (
     <>
-      {/* AR Button - Click to activate */}
-      <div className={className} onClick={handleARClick}>
+      {/* AR Button - Click to activate (Android) */}
+      <div className={className} onClick={handleAndroidARClick}>
         {children}
       </div>
 
-      {/* Model Viewer - Hidden but ready for AR */}
-      {isClient && (
+      {/* Model Viewer - Hidden but ready for AR (Android only) */}
+      {isClient && !isIOS && (
         <model-viewer
           ref={modelViewerRef}
           src={modelSrc}
-          ios-src={iosSrc}
           ar
-          ar-modes="webxr scene-viewer quick-look"
+          ar-modes="webxr scene-viewer"
           ar-placement="floor"
-          ar-scale="fixed"
-          bounds="tight"
+          camera-controls
           loading="eager"
-          reveal="interaction"
           style={{ 
             display: 'none',
             position: 'fixed',
             top: '-9999px',
             left: '-9999px',
             width: '1px',
-            height: '1px'
+            height: '1px',
+            visibility: 'hidden',
+            opacity: 0,
+            pointerEvents: 'none'
           }}
-        >
-          {/* Square slot for defining exact square shape */}
-          <div slot="ar-slot">
-            <div style={{
-              width: '1m',
-              height: '1m',
-              transform: 'translate(-50%, -50%)'
-            }} />
-          </div>
-        </model-viewer>
+        />
       )}
     </>
   );
