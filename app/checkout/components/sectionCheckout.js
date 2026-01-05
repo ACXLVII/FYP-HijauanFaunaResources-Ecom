@@ -86,12 +86,7 @@ export default function SectionCheckout() {
     return sum + price;
   }, 0);
   
-  // Apply 10% discount
-  const discountRate = 0.10;
-  const discountAmount = subtotal * discountRate;
-  const discountedSubtotal = subtotal - discountAmount;
-  
-  const total = discountedSubtotal + (orderData.requestShipping ? shippingCost : 0);
+  const total = subtotal + (orderData.requestShipping ? shippingCost : 0);
   
   const selectedProductFields = productsInCart.map(product => ({
     category: product.category,
@@ -518,8 +513,6 @@ export default function SectionCheckout() {
         distance: orderData.requestShipping ? distance.toString() : '0',
         shippingCost: orderData.requestShipping ? shippingCost.toString() : '0',
         products: truncateMetadata(productsStr),
-        subtotal: subtotal.toString(),
-        discountAmount: discountAmount.toFixed(2),
         total: total.toString(),
       };
 
@@ -1042,10 +1035,6 @@ export default function SectionCheckout() {
                 <div className="flex justify-between">
                   <span className="text-[#4A5565]">Subtotal:</span>
                   <span className="font-bold text-[#498118]">RM {subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#4A5565]">Discount (10%):</span>
-                  <span className="font-bold text-[#498118]">-RM {discountAmount.toFixed(2)}</span>
                 </div>
                 {orderData.requestShipping && shippingCost > 0 && (
                   <div className="flex justify-between">
