@@ -468,7 +468,7 @@ export default function ARPreviewMultiPlacement({
 
             {/* Title */}
             <h2 className="text-2xl font-bold text-center mb-3 text-gray-800">
-              AR Multi-Placement (Android Only)
+              AR Grass Placement
             </h2>
 
             {/* Instructions */}

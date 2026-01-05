@@ -210,7 +210,7 @@ export default function ProductCard({ product }) {
 
         {/* Button */}
         <button
-          className={`w-full p-2 lg:p-4 rounded-lg lg:rounded-xl shadow-lg transition ${
+          className={`mb-2 lg:mb-4 w-full p-2 lg:p-4 rounded-lg lg:rounded-xl shadow-lg transition ${
             product.inStock
               ? 'bg-[#498118] hover:scale-105 active:scale-95 active:shadow-none cursor-pointer'
               : 'bg-[#AAAAAA] cursor-not-allowed'
@@ -229,15 +229,17 @@ export default function ProductCard({ product }) {
           if (!arPaths) return null;
           
           return (
+            // Replace the two separate buttons with one:
             <ARPreviewMultiPlacement
-              className="w-full p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-lg active:shadow-none cursor-pointer transition hover:scale-105 active:scale-95 disabled:opacity-70 mt-2 lg:mt-3"
-              modelSrc={arPaths.modelSrc}
+              className="p-2 lg:p-4 bg-[#623183] rounded-lg lg:rounded-xl shadow-md active:shadow-none cursor-pointer transition hover:scale-101 active:scale-99 disabled:opacity-70"
+              modelSrc="/models/live_grass/philippine.glb"
+              iosSrc="/models/live_grass/philippine.usdz"
               arPlacement="floor"
             >
               <div className="flex items-center justify-center gap-2 lg:gap-4">
-                <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]"/>
+                <TbAugmentedReality2 className="text-xl lg:text-2xl text-[#FFFFFF]" />
                 <h1 className="font-bold tracking-tight text-md lg:text-lg text-[#FFFFFF]">
-                  Preview in AR (Android)
+                  AR Preview
                 </h1>
               </div>
             </ARPreviewMultiPlacement>
@@ -245,7 +247,7 @@ export default function ProductCard({ product }) {
         })()}
 
         {/* iOS AR Button - Quick Look */}
-        {(() => {
+        {/* {(() => {
           const arPaths = getARModelPaths(product.name, product.id || product.doc_id);
           if (!arPaths || !arPaths.iosSrc) return null;
           
@@ -262,7 +264,7 @@ export default function ProductCard({ product }) {
               </div>
             </button>
           );
-        })()}
+        })()} */}
 
       </div>
       {/* Product Details ENDS */}
