@@ -89,20 +89,12 @@ export default function ARPreviewMultiPlacement({
         }
       }
       
-      // Force hide with inline styles (don't use cssText as it replaces everything)
-      viewer.style.display = 'none';
-      viewer.style.position = 'fixed';
-      viewer.style.top = '-9999px';
-      viewer.style.left = '-9999px';
-      viewer.style.width = '1px';
-      viewer.style.height = '1px';
-      viewer.style.visibility = 'hidden';
-      viewer.style.opacity = '0';
-      viewer.style.pointerEvents = 'none';
-      viewer.style.zIndex = '-9999';
+      // Hide the model-viewer completely (use cssText to override all previous styles)
+      // BUT keep the ar attribute intact (don't remove it)
+      viewer.style.cssText = 'display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 1px !important; height: 1px !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -9999 !important;';
       
-      // IMPORTANT: Don't remove the 'ar' attribute or 'camera-controls'
-      // This was breaking iOS re-launches. Just hide the element visually.
+      // IMPORTANT: Don't remove the 'ar' attribute
+      // This was breaking iOS re-launches. The element must keep its AR configuration.
       
       console.log('[AR Cleanup] Model viewer hidden');
     }
@@ -258,35 +250,35 @@ export default function ARPreviewMultiPlacement({
         cleanup();
       }, 300000); // 5 minutes
       
-      // Make model-viewer visible for AR activation (but NOT on iOS - Quick Look handles it)
-      if (!isIOS) {
-        modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block; visibility: visible; opacity: 1;';
-      }
+      // Make model-viewer visible for AR activation
+      // Clear any previous inline styles and make it temporarily visible
+      modelViewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: transparent; display: block; visibility: visible; opacity: 1;';
+      console.log('[AR Activation] Model viewer made visible');
       
-      // Wait for model to load if needed (skip on iOS - it uses USDZ which loads separately)
-      if (!isIOS && !modelViewer.loaded) {
+      // Wait for model to load if needed
+      if (!modelViewer.loaded) {
+        console.log('[AR Activation] Waiting for model to load...');
         await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => reject(new Error('Model loading timeout. Please check your connection.')), 15000);
           const onLoad = () => {
             clearTimeout(timeout);
             modelViewer.removeEventListener('load', onLoad);
+            console.log('[AR Activation] Model loaded successfully');
             resolve();
           };
           modelViewer.addEventListener('load', onLoad);
           if (modelViewer.loaded) {
             clearTimeout(timeout);
+            console.log('[AR Activation] Model already loaded');
             resolve();
           }
         });
+      } else {
+        console.log('[AR Activation] Model already loaded');
       }
 
-      // On iOS, just wait briefly for model-viewer to be ready
-      if (isIOS) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      } else {
-        // Wait a moment for everything to be ready
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
+      // Wait a moment for everything to be ready
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       // Activate AR
       if (modelViewer && typeof modelViewer.activateAR === 'function') {
