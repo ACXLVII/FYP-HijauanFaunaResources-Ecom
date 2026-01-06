@@ -66,14 +66,9 @@ export default function ARPreviewMultiPlacement({
 
   if (!isClient) return null;
 
+  // Hide AR button on desktop - mobile and tablets only
   if (!isMobile) {
-    return (
-      <div className={className}>
-        <div className="opacity-50 cursor-not-allowed">
-          {children}
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // iOS: Use native <a rel="ar"> - INSTANT, NO LOADING
