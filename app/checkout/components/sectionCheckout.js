@@ -86,7 +86,12 @@ export default function SectionCheckout() {
     return sum + price;
   }, 0);
   
-  const total = subtotal + (orderData.requestShipping ? shippingCost : 0);
+  // Calculate 10% discount
+  const discountPercentage = 10;
+  const discountAmount = subtotal * (discountPercentage / 100);
+  const subtotalAfterDiscount = subtotal - discountAmount;
+  
+  const total = subtotalAfterDiscount + (orderData.requestShipping ? shippingCost : 0);
   
   const selectedProductFields = productsInCart.map(product => ({
     category: product.category,
@@ -1036,6 +1041,13 @@ export default function SectionCheckout() {
                   <span className="text-[#4A5565]">Subtotal:</span>
                   <span className="font-bold text-[#498118]">RM {subtotal.toFixed(2)}</span>
                 </div>
+                
+                {/* 10% Discount Display */}
+                <div className="flex justify-between">
+                  <span className="text-[#4A5565]">Discount (10%):</span>
+                  <span className="font-bold text-[#dc2626]">-RM {discountAmount.toFixed(2)}</span>
+                </div>
+                
                 {orderData.requestShipping && shippingCost > 0 && (
                   <div className="flex justify-between">
                     <span className="text-[#4A5565]">Shipping:</span>
