@@ -16,6 +16,29 @@ export async function POST(request) {
       shippingCost
     });
 
+    // Create or ensure 10% discount coupon exists
+    try {
+      // Try to retrieve existing coupon
+      await stripe.coupons.retrieve('DISCOUNT10PERCENT');
+      console.log('Using existing 10% discount coupon');
+    } catch (error) {
+      // Coupon doesn't exist, create it
+      if (error.code === 'resource_missing') {
+        try {
+          await stripe.coupons.create({
+            id: 'DISCOUNT10PERCENT',
+            percent_off: 10,
+            duration: 'forever',
+            name: '10% Discount',
+          });
+          console.log('Created new 10% discount coupon');
+        } catch (createError) {
+          console.warn('Could not create coupon:', createError.message);
+          // Continue without discount if creation fails
+        }
+      }
+    }
+
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
       console.error('Validation failed: No items provided');
@@ -78,9 +101,9 @@ export async function POST(request) {
       line_items: normalizedItems,
       mode: 'payment',
       
-      // Add discounts array with your coupon ID
+      // Automatic 10% discount applied to all orders
       discounts: [{
-        coupon: 'coupon_EOY2025', // Replace with your actual coupon ID
+        coupon: 'DISCOUNT10PERCENT', // 10% off coupon
       }],
 
       //LIVE MODE: Production domain URLs
