@@ -83,15 +83,13 @@ export async function POST(request) {
         coupon: 'coupon_EOY2025', // Replace with your actual coupon ID
       }],
 
-      //LIVE MODE: Uncomment the line below to use the production URL
-      // success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://fyp.hijauanfauna.com'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      // cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://fyp.hijauanfauna.com'}/checkout/cancel`,
-      //LIVE MODE: Uncomment the line above to use the production URL
-
-      //TEST MODE: Uncomment the line below to use the localhost URL
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/cancel`,
-      //TEST MODE: Uncomment the line above to use the localhost URL
+      //LIVE MODE: Production domain URLs
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://fyp.hijauanfauna.com'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://fyp.hijauanfauna.com'}/checkout/cancel`,
+      
+      //TEST MODE: Localhost URLs (commented out for production)
+      // success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      // cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/cancel`,
 
       customer_email: customerEmail,
       metadata: {
